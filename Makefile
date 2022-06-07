@@ -1,10 +1,10 @@
 # Set up defaults for implicit rules
-CC = gcc -g
+CC = gcc -g # TODO: Remove debugging flag
 CFLAGS = -std=c99 -Wall -Werror
 
 # Define source code and object code macro
-SRC = main.c err.c image.c imageInput.c
-MODULES = err.c image.c imageInput.c
+SRC = main.c err.c image.c imageInput.c matrixMath.c
+MODULES = err.c image.c imageInput.c matrixMath.c
 OBJ = $(SRC:.c=.o)
 CLN = $(OBJ) $(SRC:.c=)
 
@@ -27,3 +27,4 @@ main.o: main.c main.h
 err.o: err.c err.h
 image.o: image.c image.h
 imageInput.o: imageInput.c imageInput.h
+matrixMath.o: matrixMath.c matrixMath.h
