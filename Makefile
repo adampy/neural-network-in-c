@@ -1,10 +1,10 @@
 # Set up defaults for implicit rules
-CC = gcc
+CC = gcc -g
 CFLAGS = -std=c99 -Wall -Werror
 
 # Define source code and object code macro
-SRC = main.c err.c image.c
-MODULES = err.c image.c
+SRC = main.c err.c image.c imageInput.c
+MODULES = err.c image.c imageInput.c
 OBJ = $(SRC:.c=.o)
 CLN = $(OBJ) $(SRC:.c=)
 
@@ -26,3 +26,4 @@ clean:
 main.o: main.c main.h
 err.o: err.c err.h
 image.o: image.c image.h
+imageInput.o: imageInput.c imageInput.h

@@ -19,7 +19,7 @@ typedef enum _error {
 int reportError(int errorCode, char* string);
 
 void badArgumentCount();
-void badFileName();
+void badFileName(char* string);
 void badMagicNumber(char* string);
 void imageMallocFailed();
 void badData(char* string);
