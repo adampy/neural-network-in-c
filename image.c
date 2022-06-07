@@ -2,8 +2,6 @@
 #include "image.h"
 #include "err.h"
 
-#include <stdio.h>
-
 int makeImage(image** img) {
     *img = malloc(sizeof(image));
     if (img == NULL) {
