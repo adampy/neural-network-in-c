@@ -5,19 +5,19 @@ int isLittleEndian();
 
 int byteSwap(int num);
 
-int readMNIST(char* datasetFilename, char* labelsFilename, image*** images, 
+int readMNIST(char* datasetFilename, char* labelsFilename, Image*** images, 
               int* numberOfImages);
 
 // --- Batch read functions ---
 int batchReadImagesWithLabels(char* datasetFilename, FILE* dataset, char* labelsFilename,
                     FILE* labels, unsigned int rows, unsigned int columns,
-                    unsigned int numberOfImages, image*** images);
+                    unsigned int numberOfImages, Image*** images);
 
 // --- Single read functions ---
-int readNextImage(char* filename, FILE* file, image* img, unsigned int rows,
+int readNextImage(char* filename, FILE* file, Image* img, unsigned int rows,
                unsigned int columns);
 
-int readNextLabel(char* filename, FILE* file, image* img);
+int readNextLabel(char* filename, FILE* file, Image* img);
 
 // --- Header read functions ---
 int readHeaders(char* datasetFilename, FILE* dataset, char* labelsFilename,

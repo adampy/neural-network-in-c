@@ -2,8 +2,8 @@
 #include "image.h"
 #include "err.h"
 
-int makeImage(image** img) {
-    *img = malloc(sizeof(image));
+int makeImage(Image** img) {
+    *img = malloc(sizeof(Image));
     if (img == NULL) {
         return reportError(IMAGE_MALLOC_FAILED, "");
     }
@@ -17,7 +17,7 @@ int makeImage(image** img) {
     return SUCCESS;
 }
 
-int allocateImageData(image* img) {
+int allocateImageData(Image* img) {
     // Check rows and columns
     if (img == NULL) {
         return reportError(MISC, "Image must be initialised before allocating data to it");
@@ -45,7 +45,7 @@ int allocateImageData(image* img) {
     return SUCCESS;
 }
 
-int freeImageData(image* img) {
+int freeImageData(Image* img) {
     if (img->hasImageDataAllocated) {
         // Free all rows allocated
         for (int i = img->numberOfRowsAllocated - 1; i >= 0; i--) {
@@ -56,7 +56,7 @@ int freeImageData(image* img) {
     return SUCCESS;
 }
 
-int freeAllImages(image** images, int numberOfImages) {
+int freeAllImages(Image** images, int numberOfImages) {
     for (int i = numberOfImages - 1; i >= 0; i--) {
         freeImageData(images[i]);
         free(images[i]);

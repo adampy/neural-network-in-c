@@ -23,7 +23,7 @@ int byteSwap(int num) { // TODO: This is not guaranteed to be 32 bits
     return swapped;
 }
 
-int readMNIST(char* datasetFilename, char* labelsFilename, image*** images, 
+int readMNIST(char* datasetFilename, char* labelsFilename, Image*** images, 
               int* numberOfImages) {
     int returnCode = 0; // Set to 0
     // Open dataset
@@ -66,10 +66,10 @@ int readMNIST(char* datasetFilename, char* labelsFilename, image*** images,
 // --- Batch read functions ---
 int batchReadImagesWithLabels(char* datasetFilename, FILE* dataset, char* labelsFilename,
                     FILE* labels, unsigned int rows, unsigned int columns,
-                    unsigned int numberOfImages, image*** images) {
+                    unsigned int numberOfImages, Image*** images) {
 
     // Initialise the output vector
-    *images = calloc(numberOfImages, sizeof(image*));
+    *images = calloc(numberOfImages, sizeof(Image*));
     if (images == NULL) {
         return reportError(IMAGE_MALLOC_FAILED, "");
     }
@@ -77,7 +77,7 @@ int batchReadImagesWithLabels(char* datasetFilename, FILE* dataset, char* labels
     // Read in all images and give them labels
     for (int i = 0; i < numberOfImages; i++) {
         // Make image
-        image* img = NULL;
+        Image* img = NULL;
         int allocated = makeImage(&img);
         if (allocated != SUCCESS) {
             return allocated;
@@ -113,7 +113,7 @@ int batchReadImagesWithLabels(char* datasetFilename, FILE* dataset, char* labels
 }
 
 // --- Single read functions ---
-int readNextImage(char* filename, FILE* file, image* img, unsigned int rows,
+int readNextImage(char* filename, FILE* file, Image* img, unsigned int rows,
                unsigned int columns) {
     
     // Read each pixel into image
@@ -128,7 +128,7 @@ int readNextImage(char* filename, FILE* file, image* img, unsigned int rows,
     return SUCCESS;
 }
 
-int readNextLabel(char* filename, FILE* file, image* img) {
+int readNextLabel(char* filename, FILE* file, Image* img) {
     unsigned char label;
     int scanCount = fread(&label, 1, 1, file);
     if (scanCount != 1) {

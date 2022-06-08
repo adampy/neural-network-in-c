@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
 
     // Initialise image output vector
     int numberOfImages = 0;
-    image** images = NULL;
+    Image** images = NULL;
     int read = readMNIST(argv[1], argv[2], &images, &numberOfImages);
     if (read != SUCCESS) {
         returnCode = read;
