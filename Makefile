@@ -3,8 +3,8 @@ CC = gcc -g # TODO: Remove debugging flag
 CFLAGS = -std=c99 -Wall -Werror
 
 # Define source code and object code macro
-SRC = main.c err.c image.c imageInput.c mathLib.c
-MODULES = err.c image.c imageInput.c mathLib.c
+SRC = main.c err.c image.c imageInput.c mathLib.c utils.c
+MODULES = err.c image.c imageInput.c mathLib.c utils.c
 OBJ = $(SRC:.c=.o)
 CLN = $(OBJ) $(SRC:.c=)
 
@@ -28,3 +28,4 @@ err.o: err.c err.h
 image.o: image.c image.h
 imageInput.o: imageInput.c imageInput.h
 mathLib.o: mathLib.c mathLib.h
+utils.o: utils.c utils.h
