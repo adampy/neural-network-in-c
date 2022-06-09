@@ -19,14 +19,19 @@ typedef struct _NeuralNetwork {
  * neurons[hiddenLayers+1] = number of neurons in the output layer
  * network = output vector
  */
-int networkMake(unsigned int hiddenLayers, unsigned int* neurons,
+int makeNetwork(unsigned int hiddenLayers, unsigned int* neurons,
                 double learningRate, NeuralNetwork** network);
+
+/**
+ * Frees all the memory relating to a given network `network`.
+ */
+void freeNetwork(NeuralNetwork* network);
 
 /**
  * Returns the output of the network when `input` is the input. The resulting
  * activations of the output layer is stored in the `output` output vector.
  */
-int networkFeedForward(NeuralNetwork* network, Matrix* input, Matrix** output);
+int feedForwardNetwork(NeuralNetwork* network, Matrix* input, Matrix** output);
 
 /**
  * Changes the weights and biases of `network` in regards to a single `input`
@@ -36,4 +41,4 @@ int networkFeedForward(NeuralNetwork* network, Matrix* input, Matrix** output);
  * For the example of MNIST datasets, an image with label '7' should place 7
  * into `result`.
  */
-int networkBackPropogateSingleInput(NeuralNetwork* network, Matrix* input, char result);
+int backpropSingleInput(NeuralNetwork* network, Matrix* input, char result);
