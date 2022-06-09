@@ -1,7 +1,8 @@
 #include <stdio.h>
-#include <time.h>
+
 #include "image.h"
 #include "mathLib.h"
+#include "neuralNetwork.h"
 
 void printImage(Image* img) {
     for (int i = 0; i < img->rows; i++) {
@@ -19,5 +20,15 @@ void printMatrix(Matrix* m) {
             printf("%.3lf\t", m->values[i * m->columns + j]);
         }
         printf("\n");
+    }
+}
+
+void printNetwork(NeuralNetwork* network) {
+    printf("Dimensions are printed in row*column format...\n");
+    for (int i = 0; i < network->hiddenLayers + 1; i++) {
+        printf("w_0: %i*%i, b_0: %i*%i\n", network->weights[i]->rows,
+                                             network->weights[i]->columns,
+                                             network->biases[i]->rows,
+                                             network->biases[i]->columns);
     }
 }

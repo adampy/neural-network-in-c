@@ -1,3 +1,6 @@
+#ifndef NEURAL_NETWORK
+#define NEURAL_NETWORK
+
 #include <stdlib.h>
 #include "err.h"
 #include "mathLib.h"
@@ -42,3 +45,5 @@ int feedForwardNetwork(NeuralNetwork* network, Matrix* input, Matrix** output);
  * into `result`.
  */
 int backpropSingleInput(NeuralNetwork* network, Matrix* input, char result);
+
+#endif // NEURAL_NETWORK

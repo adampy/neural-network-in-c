@@ -3,8 +3,10 @@
 
 #include "image.h"
 #include "mathLib.h"
+#include "neuralNetwork.h"
 
 void printImage(Image* img);
 void printMatrix(Matrix* m);
+void printNetwork(NeuralNetwork* network);
 
 #endif // UTILS
