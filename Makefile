@@ -3,8 +3,8 @@ CC = gcc -g # TODO: Remove debugging flag
 CFLAGS = -std=c99 -Wall -Werror
 
 # Define source code and object code macro
-SRC = main.c err.c image.c imageInput.c mathLib.c utils.c
-MODULES = err.c image.c imageInput.c mathLib.c utils.c
+SRC = main.c err.c image.c imageInput.c mathLib.c utils.c neuralNetwork.c
+MODULES = err.c image.c imageInput.c mathLib.c utils.c neuralNetwork.c
 OBJ = $(SRC:.c=.o)
 CLN = $(OBJ) $(SRC:.c=)
 
@@ -29,3 +29,4 @@ image.o: image.c image.h
 imageInput.o: imageInput.c imageInput.h
 mathLib.o: mathLib.c mathLib.h
 utils.o: utils.c utils.h
+neuralNetwork.o: neuralNetwork.c neuralNetwork.h
