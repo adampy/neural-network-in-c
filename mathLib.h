@@ -15,6 +15,7 @@ int addMatrices(Matrix* m1, Matrix* m2, Matrix** result);
 int multiplyMatrices(Matrix* m1, Matrix* m2, Matrix** result);
 int transposeMatrix(Matrix* m1, Matrix** result);
 int hadamardProduct(Matrix* m1, Matrix* m2, Matrix** result);
+void randomiseMatrix(Matrix* m);
 
 // --- Activation functions ---
 double relu(int x);
