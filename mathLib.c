@@ -109,10 +109,24 @@ int hadamardProduct(Matrix* m1, Matrix* m2, Matrix** result) {
 }
 
 // --- Activation functions ---
-double relu(int x);
-double sigmoid(int x);
-double drelu(int x);
-double dsigmoid(int x);
+double relu(int x) {
+    return (double) x * (x > 0);
+}
+double drelu(int x) {
+    return x > 0;
+}
+
+double sigmoid(int x) {
+    int abs = x;
+    if (abs < 0) {
+        abs = -abs;
+    }
+    return 0.5*(x/(1+abs)) + 0.5;
+}
+double dsigmoid(int x) {
+    double s = sigmoid(x);
+    return s*(1-s);
+}
 
 // --- Backpropagation functions ---
 int meanSquaredError(Matrix* actual, int expected);
