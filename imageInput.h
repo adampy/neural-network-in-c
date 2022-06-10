@@ -1,6 +1,8 @@
 #ifndef IMAGE_INPUT
 #define IMAGE_INPUT
 
+#include "mathLib.h"
+
 int isLittleEndian();
 
 int byteSwap(int num);
@@ -27,5 +29,7 @@ int readImageFileHeader(char* filename, FILE* file, int* numberOfImages,
                         int* rows, int* columns);
 
 int readLabelsFileHeader(char* filename, FILE* file, int* numberOfLabels);
+
+int getMatrixFromImage(Image* img, Matrix** output);
 
 #endif // IMAGE_INPUT

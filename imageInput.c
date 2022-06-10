@@ -214,3 +214,19 @@ int readLabelsFileHeader(char* filename, FILE* file, int* numberOfLabels) {
     *numberOfLabels = headerData[1];
     return SUCCESS;
 }
+
+int getMatrixFromImage(Image* img, Matrix** output) {
+    // Initialise output matrix
+    int returnCode = makeMatrix(img->rows * img->columns, 1, output);
+    if (returnCode != SUCCESS) {
+        return returnCode;
+    }
+
+    // Move data from `img` into `output`
+    for (int i = 0; i < img->rows; i++) {
+        for (int j = 0; j < img->columns; j++) {
+            (*output)->values[i * img->columns + j] = img->imageData[i][j];
+        }
+    }
+    return SUCCESS;
+}

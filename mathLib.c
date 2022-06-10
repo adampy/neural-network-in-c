@@ -113,7 +113,7 @@ void randomiseMatrix(Matrix* m) {
     // Assign random values to matrices from -2 to 2 TODO: Dynamic range
     srand(time(NULL));
     for (int i = 0; i < m->rows * m->columns; i++) {
-        m->values[i] = 4 * (rand() / RAND_MAX) - 2;
+        m->values[i] = 4 * ((double) rand() / RAND_MAX) - 2;
     }
 }
 

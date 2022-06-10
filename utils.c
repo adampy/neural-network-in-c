@@ -26,8 +26,8 @@ void printMatrix(Matrix* m) {
 void printNetwork(NeuralNetwork* network) {
     printf("Dimensions are printed in row*column format...\n");
     for (int i = 0; i < network->hiddenLayers + 1; i++) {
-        printf("w_0: %i*%i, b_0: %i*%i\n", network->weights[i]->rows,
-                                             network->weights[i]->columns,
+        printf("w_%i: %i*%i, b_%i: %i*%i\n", i, network->weights[i]->rows,
+                                             network->weights[i]->columns, i,
                                              network->biases[i]->rows,
                                              network->biases[i]->columns);
     }
