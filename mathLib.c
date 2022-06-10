@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <time.h> // For srand
+#include <math.h> // For exp()
 #include "err.h"
 #include "mathLib.h"
 
@@ -127,22 +128,24 @@ void randomiseMatrix(Matrix* m) {
 }
 
 // --- Activation functions ---
-double relu(int x) {
-    return (double) x * (x > 0);
+void relu(Matrix* m) { // Expects column matrix
+    for (int i = 0; i < m->rows; i++) {
+        double x = m->values[i];
+        m->values[i] = (double) x * (x > 0);
+    }
 }
 double drelu(int x) {
     return x > 0;
 }
 
-double sigmoid(int x) {
-    int abs = x;
-    if (abs < 0) {
-        abs = -abs;
+void sigmoid(Matrix* m) {
+    for (int i = 0; i < m->rows; i++) {
+        double x = m->values[i];
+        m->values[i] = 1/(1+exp(-x));
     }
-    return 0.5*(x/(1+abs)) + 0.5;
 }
 double dsigmoid(int x) {
-    double s = sigmoid(x);
+    double s = 1/(1+exp(-x));
     return s*(1-s);
 }
 

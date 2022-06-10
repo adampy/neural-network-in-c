@@ -18,9 +18,9 @@ int hadamardProduct(Matrix* m1, Matrix* m2, Matrix** result);
 void randomiseMatrix(Matrix* m);
 
 // --- Activation functions ---
-double relu(int x);
-double sigmoid(int x);
+void relu(Matrix *);
 double drelu(int x);
+void sigmoid(Matrix *);
 double dsigmoid(int x);
 
 // --- Backpropagation functions ---

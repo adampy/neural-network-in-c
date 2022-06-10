@@ -1,6 +1,6 @@
 # Set up defaults for implicit rules
-CC = gcc -g # TODO: Remove debugging flag
-CFLAGS = -std=c99 -Wall -Werror
+CC = gcc -g
+CFLAGS = -std=c99 -Wall -Werror # TODO: Remove debugging flag
 
 # Define source code and object code macro
 SRC = main.c err.c image.c imageInput.c mathLib.c utils.c neuralNetwork.c
@@ -16,7 +16,7 @@ all: $(OBJ) main
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 main: main.o $(MODULES)
-	$(CC) main.o $(MODULES) -o main
+	$(CC) main.o $(MODULES) -o main -lm
 
 # Clean target
 clean:

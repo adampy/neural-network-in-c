@@ -60,3 +60,40 @@ void freeNetwork(NeuralNetwork* network) {
     // Free network itself
     free(network);
 }
+
+int feedForwardNetwork(NeuralNetwork* network, Matrix* input, Matrix** output) {
+    // Make output matrix if not allocated
+    int errorCode = makeMatrix(input->rows, input->columns, output);
+    if (errorCode != SUCCESS) {
+        return errorCode;
+    }
+
+    // Swap input values into activation array (output is used for activations for ease)
+    (*output)->rows = input->rows;
+    (*output)->columns = input->columns;
+    *(*output)->values = *input->values;
+
+    // Feed-forward through all layers
+    for (int i = 0; i < network->hiddenLayers + 1; i++) {
+        Matrix* weights = network->weights[i];
+        Matrix* biases = network->biases[i];
+        Matrix* result1 = NULL;
+        Matrix* result2 = NULL;
+        
+        errorCode = multiplyMatrices(weights, *output, &result1);
+        if (errorCode != SUCCESS) {
+            return errorCode;
+        }
+        errorCode = addMatrices(result1, biases, &result2);
+        if (errorCode != SUCCESS) {
+            return errorCode;
+        }
+        sigmoid(result2); // Perform ReLU on the column matrix
+
+        freeMatrix(*output); // This matrix no longer needed, free it
+        *output = result2;
+        freeMatrix(result1); // TODO: Remove return value from freeMatrix
+    }
+
+    return SUCCESS;
+}
