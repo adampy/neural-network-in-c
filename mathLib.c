@@ -27,12 +27,14 @@ int addMatrices(Matrix* m1, Matrix* m2, Matrix** result) {
         return reportError(MISC, "addMatrices error: must have same dimensions");
     }
 
-    // Create matrix
-    int made = makeMatrix(m1->rows, m1->columns, result);
-    if (made != SUCCESS) {
-        return made;
+    // Allocate result matrix if not allocated
+    if (*result == NULL) {
+        int made = makeMatrix(m1->rows, m1->columns, result);
+        if (made != SUCCESS) {
+            return made;
+        }  
     }
-
+   
     // Move addition into result vector
     for (int i = 0; i < m1->rows * m1->columns; i++) {
        (*result)->values[i] = m1->values[i] + m2->values[i];
@@ -45,10 +47,13 @@ int multiplyMatrices(Matrix* m1, Matrix* m2, Matrix** result) {
     if (m1->columns != m2->rows) {
         return reportError(MISC, "multiplyMatrices error:  matrices cannot be multiplied");
     }
-    // Create matrix with new dimensions
-    int made = makeMatrix(m1->rows, m2->columns, result);
-    if (made != SUCCESS) {
-        return made;
+    
+    // Allocate result matrix if not allocated
+    if (*result == NULL) {
+        int made = makeMatrix(m1->rows, m2->columns, result);
+        if (made != SUCCESS) {
+            return made;
+        }  
     }
 
     // Apply matrix multiplication
@@ -75,9 +80,11 @@ int multiplyMatrices(Matrix* m1, Matrix* m2, Matrix** result) {
 
 int transposeMatrix(Matrix* m1, Matrix** result) {
     // Create matrix with dimensions transposed
-    int made = makeMatrix(m1->columns, m1->rows, result);
-    if (made != SUCCESS) {
-        return made;
+    if (*result == NULL) {
+        int made = makeMatrix(m1->columns, m1->rows, result);
+        if (made != SUCCESS) {
+            return made;
+        }
     }
 
     for (int i = 0; i < m1->rows; i++) {
@@ -97,9 +104,11 @@ int hadamardProduct(Matrix* m1, Matrix* m2, Matrix** result) {
     }
 
     // Create matrix
-    int made = makeMatrix(m1->rows, m1->columns, result);
-    if (made != SUCCESS) {
-        return made;
+    if (*result == NULL) {
+        int made = makeMatrix(m1->rows, m1->columns, result);
+        if (made != SUCCESS) {
+            return made;
+        }
     }
 
     // Move hadamard products into result vector
