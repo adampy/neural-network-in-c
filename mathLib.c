@@ -151,3 +151,16 @@ double dsigmoid(int x) {
 
 // --- Backpropagation functions ---
 int meanSquaredError(Matrix* actual, int expected);
+
+// --- Helper functions ---
+int indexOfMaxValue(Matrix* m) { // Expects column matrix TODO: Add this as err
+    int indx = 0;
+    double max = -1;
+    for (int i = 0; i < m->rows; i++) {
+        if (m->values[i] > max) {
+            indx = i;
+            max = m->values[i];
+        }
+    }
+    return indx;
+}

@@ -26,3 +26,6 @@ double dsigmoid(int x);
 // --- Backpropagation functions ---
 int meanSquaredError(Matrix* actual, int expected);
 #endif // MATH_LIB
+
+// --- Helper functions ---
+int indexOfMaxValue(Matrix* m);

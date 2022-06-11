@@ -9,39 +9,43 @@
 
 
 /**
- * argv = {main, datasetFilename, labelsFilename}
+ * argv = {main, trainingDatasetFilename, trainingLabelsFilename,
+ *         testDatasetFilename, testLabelsFilename}
  */
 int main(int argc, char** argv) {
     // Check all arguments given
     if (argc == 1) {
-        printf("Usage: ./main datasetFilename, labelsFilename\n");
+        printf("Usage: ./main trainingDatasetFilename trainingLabelsFilename testDatasetFilename testLabelsFilename\n");
         return SUCCESS;
     }
-    if (argc != 3) {
+    if (argc != 5) {
         return reportError(BAD_ARGUMENT_COUNT, "");
     }
 
-    // Error code
-    int returnCode = SUCCESS;
-
-    // Initialise image output vector
-    int numberOfImages = 0;
-    Image** images = NULL;
-    int read = readMNIST(argv[1], argv[2], &images, &numberOfImages);
-    if (read != SUCCESS) {
-        returnCode = read;
+    // Initialise training dataset
+    int numberOfTrainingImages = 0;
+    Image** trainingImages = NULL;
+    int returnCode = readMNIST(argv[1], argv[2], &trainingImages, &numberOfTrainingImages);
+    if (returnCode != SUCCESS) {
+        goto cleanUp;
+    }
+    // Initialise testing dataset
+    int numberOfTestingImages = 0;
+    Image** testingImages = NULL;
+    returnCode = readMNIST(argv[3], argv[4], &testingImages, &numberOfTestingImages);
+    if (returnCode != SUCCESS) {
         goto cleanUp;
     }
 
     // Choose random image
-    srand(time(NULL));
+    /*srand(time(NULL));
     Image* img = images[rand() % numberOfImages];
-    printImage(img);
+    //printImage(img);
     Matrix* m = NULL;
     returnCode = getMatrixFromImage(img, &m);
     if (returnCode != SUCCESS) {
         goto cleanUp;
-    }
+    }*/
 
     // Set up NN
     NeuralNetwork* network = NULL;
@@ -50,23 +54,19 @@ int main(int argc, char** argv) {
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }
-    printNetwork(network);
-    //printMatrix(network->weights[1]);
 
-    // Feedforward result
-    Matrix* result = NULL;
-    returnCode = feedForwardNetwork(network, m, &result);
+    int correctImages = 0;
+    returnCode = evaluateNetwork(network, testingImages, numberOfTestingImages,
+                        &correctImages);
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }
-    printf("---Feedforward result---\n");
-    printMatrix(result);
+    printf("NN evaluation: %i / %i\n", correctImages, numberOfTestingImages);
 
     // Cleanup and exit execution
     cleanUp:
         freeNetwork(network);
-        freeMatrix(m);
-        freeMatrix(result);
-        returnCode = freeAllImages(images, numberOfImages);
+        freeAllImages(trainingImages, numberOfTrainingImages);
+        freeAllImages(testingImages, numberOfTestingImages);
         return returnCode;
 }

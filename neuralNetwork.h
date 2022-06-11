@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "err.h"
 #include "mathLib.h"
+#include "image.h"
 
 typedef struct _NeuralNetwork {
     unsigned int hiddenLayers;
@@ -45,5 +46,14 @@ int feedForwardNetwork(NeuralNetwork* network, Matrix* input, Matrix** output);
  * into `result`.
  */
 int backpropSingleInput(NeuralNetwork* network, Matrix* input, char result);
+
+/**
+ * Evalutes a neural network using the given array of images, `images`. The
+ * neural network's output is taken to be whichever output neuron is the
+ * biggest. The number of correctly classified images is stored in
+ * `correctImages`.
+ */
+int evaluateNetwork(NeuralNetwork* network, Image** images, int numberOfImages,
+                    int* correctImages);
 
 #endif // NEURAL_NETWORK

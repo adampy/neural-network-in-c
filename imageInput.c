@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <byteswap.h>
-#include "image.h"
 #include "err.h"
 #include "imageInput.h"
 

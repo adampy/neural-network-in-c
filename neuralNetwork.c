@@ -1,8 +1,7 @@
 #include <stdlib.h>
 #include <time.h> // For random number generation
-#include "err.h"
-#include "mathLib.h"
-#include "neuralNetwork.h"
+#include "neuralNetwork.h" // TODO: Remove all includes and put them in headers
+#include "imageInput.h" // Used for implementation of evaluateNetwork
 
 int makeNetwork(unsigned int hiddenLayers, unsigned int* neurons,
                 double learningRate, NeuralNetwork** network) {
@@ -88,12 +87,47 @@ int feedForwardNetwork(NeuralNetwork* network, Matrix* input, Matrix** output) {
         if (errorCode != SUCCESS) {
             return errorCode;
         }
-        sigmoid(result2); // Perform ReLU on the column matrix
+
+        sigmoid(result2); // Perform activation function on the column matrix
 
         freeMatrix(*output); // This matrix no longer needed, free it
         *output = result2;
         freeMatrix(result1); // TODO: Remove return value from freeMatrix
     }
 
+    return SUCCESS;
+}
+
+int evaluateNetwork(NeuralNetwork* network, Image** images, int numberOfImages,
+                    int* correctImages) {
+    for (int i = 0; i < numberOfImages; i++) {
+        // Allocate return vars
+        Image* img = images[i];
+        Matrix* m = NULL;
+        int returnCode = getMatrixFromImage(img, &m);
+        if (returnCode != SUCCESS) {
+            free(m);
+            return returnCode; // TODO: Change all errorCode vars to returnCode
+        }
+
+        // Feedforward
+        Matrix* result = NULL;
+        returnCode = feedForwardNetwork(network, m, &result);
+        if (returnCode != SUCCESS) {
+            free(m);
+            return returnCode; // TODO: Change all errorCode vars to returnCode
+        }
+        
+        // Check result
+        int output = indexOfMaxValue(result);
+        int expected = (int) img->label; // Convert char to int
+        if (output + 1 == expected) {
+            (*correctImages)++;
+        }
+
+        // Free image matrix
+        free(m);
+        free(result);
+    }
     return SUCCESS;
 }

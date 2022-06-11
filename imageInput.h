@@ -1,6 +1,8 @@
 #ifndef IMAGE_INPUT
 #define IMAGE_INPUT
 
+#include <stdio.h>
+#include "image.h"
 #include "mathLib.h"
 
 int isLittleEndian();
