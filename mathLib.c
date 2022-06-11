@@ -22,41 +22,27 @@ int freeMatrix(Matrix* m) {
     return SUCCESS;
 }
 
-int addMatrices(Matrix* m1, Matrix* m2, Matrix** result) {
+int addMatricesInto(Matrix* m1, Matrix* m2, Matrix* result) {
     // Check dimensions
     if (m1->rows != m2->rows || m1->columns != m2->columns) {
         return reportError(MISC, "addMatrices error: must have same dimensions");
     }
+    // TODO: Ensure result matrix has appropriate dimensions
 
-    // Allocate result matrix if not allocated
-    if (*result == NULL) {
-        int made = makeMatrix(m1->rows, m1->columns, result);
-        if (made != SUCCESS) {
-            return made;
-        }  
-    }
-   
     // Move addition into result vector
     for (int i = 0; i < m1->rows * m1->columns; i++) {
-       (*result)->values[i] = m1->values[i] + m2->values[i];
+       result->values[i] = m1->values[i] + m2->values[i];
     }
     return SUCCESS;
 }
 
-int multiplyMatrices(Matrix* m1, Matrix* m2, Matrix** result) {
+int multiplyMatricesInto(Matrix* m1, Matrix* m2, Matrix* result) {
     // Check dimensions
     if (m1->columns != m2->rows) {
         return reportError(MISC, "multiplyMatrices error:  matrices cannot be multiplied");
     }
+    // TODO: Ensure result matrix has appropriate dimensions
     
-    // Allocate result matrix if not allocated
-    if (*result == NULL) {
-        int made = makeMatrix(m1->rows, m2->columns, result);
-        if (made != SUCCESS) {
-            return made;
-        }  
-    }
-
     // Apply matrix multiplication
     // for m2 columns
     // for m1 rows
@@ -73,7 +59,7 @@ int multiplyMatrices(Matrix* m1, Matrix* m2, Matrix** result) {
                 sum += (first_element * second_element);
             }
             // Put into result[j][i]
-            (*result)->values[j * (*result)->columns + i] = sum;
+            result->values[j * result->columns + i] = sum;
         }
     }
     return SUCCESS;
@@ -127,21 +113,27 @@ void randomiseMatrix(Matrix* m) {
     }
 }
 
+void zeroMatrix(Matrix* m) {
+    for (int i = 0; i < m->rows * m->columns; i++) {
+        m->values[i] = 0;
+    }
+}
+
 // --- Activation functions ---
-void relu(Matrix* m) { // Expects column matrix
+void reluInto(Matrix* m, Matrix* output) { // Expects column matrix
     for (int i = 0; i < m->rows; i++) {
         double x = m->values[i];
-        m->values[i] = (double) x * (x > 0);
+        output->values[i] = (double) x * (x > 0);
     }
 }
 double drelu(int x) {
     return x > 0;
 }
 
-void sigmoid(Matrix* m) {
+void sigmoidInto(Matrix* m, Matrix* output) {
     for (int i = 0; i < m->rows; i++) {
         double x = m->values[i];
-        m->values[i] = 1/(1+exp(-x));
+        output->values[i] = 1/(1+exp(-x));
     }
 }
 double dsigmoid(int x) {

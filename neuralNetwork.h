@@ -12,6 +12,8 @@ typedef struct _NeuralNetwork {
     double learningRate;
     Matrix** weights;
     Matrix** biases;
+    Matrix** z; // Stores the summed inputs of each neuron for each layer
+    Matrix** a; // Stores activation of each neuron for each layer
 } NeuralNetwork;
 
 /**
@@ -32,20 +34,10 @@ int makeNetwork(unsigned int hiddenLayers, unsigned int* neurons,
 void freeNetwork(NeuralNetwork* network);
 
 /**
- * Returns the output of the network when `input` is the input. The resulting
- * activations of the output layer is stored in the `output` output vector.
+ * Returns the output of the network when `input` is the input. Outputs
+ * are stored in `network->a` and `network->z` for each layer.
  */
-int feedForwardNetwork(NeuralNetwork* network, Matrix* input, Matrix** output);
-
-/**
- * Changes the weights and biases of `network` in regards to a single `input`
- * which is the input to the network, and `correctNeuron` which is the index
- * of the correct neuron.
- * 
- * For the example of MNIST datasets, an image with label '7' should place 7
- * into `result`.
- */
-int backpropSingleInput(NeuralNetwork* network, Matrix* input, char result);
+int feedForwardNetwork(NeuralNetwork* network, Matrix* input);
 
 /**
  * Evalutes a neural network using the given array of images, `images`. The
@@ -55,5 +47,23 @@ int backpropSingleInput(NeuralNetwork* network, Matrix* input, char result);
  */
 int evaluateNetwork(NeuralNetwork* network, Image** images, int numberOfImages,
                     int* correctImages);
+
+/**
+ * Changes the weights and biases of `network` in regards to a single `input`
+ * which is the input to the network, and `correctNeuron` which is the index
+ * of the correct neuron.
+ */
+int backpropSingleInput(NeuralNetwork* network, Matrix* input);
+
+/**
+ * Performs mini-batch gradient descent for a number of epochs `epochs`.
+ * The number of training examples in each mini batches is `miniBatcheSize`
+ * and the weights and biases are updated at the end of each mini batch
+ * completion. Training images are provided for training and testing images
+ * are provided for evaluating the network at the end of each epoch.
+ */
+int trainNetworkMiniBatches(NeuralNetwork* network, int epochs, int miniBatchSize,
+                             Image** trainingImages, int numberOfTrainingImages,
+                             Image** testingImages, int numberOfTestingImages); // TODO: Change ints to unsigned if necessary
 
 #endif // NEURAL_NETWORK

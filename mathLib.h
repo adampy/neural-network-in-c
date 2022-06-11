@@ -11,16 +11,18 @@ typedef struct _Matrix {
 int makeMatrix(unsigned int rows, unsigned int columns, Matrix** m);
 int freeMatrix(Matrix* m);
 
-int addMatrices(Matrix* m1, Matrix* m2, Matrix** result);
-int multiplyMatrices(Matrix* m1, Matrix* m2, Matrix** result);
+int addMatricesInto(Matrix* m1, Matrix* m2, Matrix* result);
+int multiplyMatricesInto(Matrix* m1, Matrix* m2, Matrix* result);
 int transposeMatrix(Matrix* m1, Matrix** result);
 int hadamardProduct(Matrix* m1, Matrix* m2, Matrix** result);
+
 void randomiseMatrix(Matrix* m);
+void zeroMatrix(Matrix* m);
 
 // --- Activation functions ---
-void relu(Matrix *);
+void reluInto(Matrix* m, Matrix* output);
 double drelu(int x);
-void sigmoid(Matrix *);
+void sigmoidInto(Matrix* m, Matrix* output);
 double dsigmoid(int x);
 
 // --- Backpropagation functions ---
