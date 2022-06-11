@@ -114,22 +114,32 @@ int feedForwardNetwork(NeuralNetwork* network, Matrix* input) {
     return SUCCESS;
 }
 
+int feedForwardNetworkImage(NeuralNetwork* network, Image* input) {
+    // Allocate return vars
+    Matrix* m = NULL;
+    int returnCode = getMatrixFromImage(input, &m);
+    if (returnCode != SUCCESS) {
+        freeMatrix(m);
+        return returnCode; // TODO: Change all errorCode vars to returnCode
+    }
+
+    // Feedforward
+    returnCode = feedForwardNetwork(network, m);
+    if (returnCode != SUCCESS) {
+        freeMatrix(m);
+        return returnCode; // TODO: Change all errorCode vars to returnCode
+    }
+    freeMatrix(m);
+    return SUCCESS; 
+}
+
 int evaluateNetwork(NeuralNetwork* network, Image** images, int numberOfImages,
                     int* correctImages) {
     for (int i = 0; i < numberOfImages; i++) {
-        // Allocate return vars
-        Image* img = images[i];
-        Matrix* m = NULL;
-        int returnCode = getMatrixFromImage(img, &m);
-        if (returnCode != SUCCESS) {
-            free(m);
-            return returnCode; // TODO: Change all errorCode vars to returnCode
-        }
-
         // Feedforward
-        returnCode = feedForwardNetwork(network, m);
+        Image* img = images[i];
+        int returnCode = feedForwardNetworkImage(network, img);
         if (returnCode != SUCCESS) {
-            free(m);
             return returnCode; // TODO: Change all errorCode vars to returnCode
         }
         
@@ -139,6 +149,9 @@ int evaluateNetwork(NeuralNetwork* network, Image** images, int numberOfImages,
         if (output + 1 == expected) {
             (*correctImages)++;
         }
+    }
+    return SUCCESS;
+}
 
         // Free image matrix
         freeMatrix(m);

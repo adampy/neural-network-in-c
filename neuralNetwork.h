@@ -40,6 +40,13 @@ void freeNetwork(NeuralNetwork* network);
 int feedForwardNetwork(NeuralNetwork* network, Matrix* input);
 
 /**
+ * Returns the output of the network when the matrix of value from an image
+ * `image` is the input. Outputs are stored in `network->a` and `network->z`
+ * for each layer.
+ */
+int feedForwardNetworkImage(NeuralNetwork* network, Image* input);
+
+/**
  * Evalutes a neural network using the given array of images, `images`. The
  * neural network's output is taken to be whichever output neuron is the
  * biggest. The number of correctly classified images is stored in
