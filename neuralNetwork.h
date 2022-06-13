@@ -73,4 +73,14 @@ int trainNetworkMiniBatches(NeuralNetwork* network, int epochs, int miniBatchSiz
                              Image** trainingImages, int numberOfTrainingImages,
                              Image** testingImages, int numberOfTestingImages); // TODO: Change ints to unsigned if necessary
 
+/**
+ * Gets the cost derivative of the network, which is a column vector of:
+ * C = a^L - y, where y is the expected output. This is the cost derivative
+ * of a quadratic cost function. Parameter `y` represents the index of the
+ * correct/expected ouptut. The cost derivative is placed into a new output
+ * vector `output` - it should be a null pointer, and is allocated in this
+ * function. // TODO: Make output vector allocation consistent
+ */
+int costDerivative(Matrix* a, int y, Matrix** output);
+
 #endif // NEURAL_NETWORK

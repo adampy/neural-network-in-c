@@ -3,6 +3,9 @@
 #include "neuralNetwork.h" // TODO: Remove all includes and put them in headers
 #include "imageInput.h" // Used for implementation of evaluateNetwork
 #include "mathLib.h" // For zeroMatrix in gradient descent
+#include "utils.h" // For shuffle
+
+#include <stdio.h>
 
 int makeNetwork(unsigned int hiddenLayers, unsigned int* neurons,
                 double learningRate, NeuralNetwork** network) {
@@ -23,33 +26,22 @@ int makeNetwork(unsigned int hiddenLayers, unsigned int* neurons,
     }
 
     // Allocate activations and sum matrices
-    (*network)->a = malloc((hiddenLayers + 1) * sizeof(Matrix));
-    (*network)->z = malloc((hiddenLayers + 1) * sizeof(Matrix));
+    (*network)->a = malloc((hiddenLayers + 2) * sizeof(Matrix));
+    (*network)->z = malloc((hiddenLayers + 2) * sizeof(Matrix));
     if ((*network)->a == NULL || (*network)->z == NULL) {
         return reportError(IMAGE_MALLOC_FAILED, "");
     }
 
-    // Make matrices
+    // Make weight and bias matrix arrays
+    int returnCode = SUCCESS;
     for (int i = 0; i < hiddenLayers + 1; i++) {
         Matrix* weights = NULL;
         Matrix* biases = NULL;
-        int returnCode = makeMatrix(neurons[i+1], neurons[i], &weights);
+        returnCode = makeMatrix(neurons[i+1], neurons[i], &weights);
         if (returnCode != SUCCESS) {
             return returnCode;
         }
         returnCode = makeMatrix(neurons[i+1], 1, &biases);
-        if (returnCode != SUCCESS) {
-            return returnCode;
-        }
-
-        // Make each activation and sum matrix
-        Matrix* a = NULL;
-        Matrix* z = NULL;
-        returnCode = makeMatrix(neurons[i+1], 1, &a);
-        if (returnCode != SUCCESS) {
-            return returnCode;
-        }
-        returnCode = makeMatrix(neurons[i+1], 1, &z);
         if (returnCode != SUCCESS) {
             return returnCode;
         }
@@ -61,6 +53,21 @@ int makeNetwork(unsigned int hiddenLayers, unsigned int* neurons,
         // Put into neural network
         (*network)->weights[i] = weights;
         (*network)->biases[i] = biases;
+    }
+
+    // Make activation and sum arrays
+    for (int i = 0; i < hiddenLayers + 2; i++) {
+        // Make each activation and sum matrix
+        Matrix* a = NULL;
+        Matrix* z = NULL;
+        returnCode = makeMatrix(neurons[i], 1, &a);
+        if (returnCode != SUCCESS) {
+            return returnCode;
+        }
+        returnCode = makeMatrix(neurons[i], 1, &z);
+        if (returnCode != SUCCESS) {
+            return returnCode;
+        }
         (*network)->a[i] = a;
         (*network)->z[i] = z;
     }
@@ -68,10 +75,13 @@ int makeNetwork(unsigned int hiddenLayers, unsigned int* neurons,
 }
 
 void freeNetwork(NeuralNetwork* network) {
-    // Free all matrices
+    // Free weight and bias matrix arrays
     for (int i = 0; i < network->hiddenLayers + 1; i++) {
         freeMatrix(network->weights[i]);
         freeMatrix(network->biases[i]);
+    }
+    // Free activation and sum arrays
+    for (int i = 0; i < network->hiddenLayers + 2; i++) {
         freeMatrix(network->a[i]);
         freeMatrix(network->z[i]);
     }
@@ -87,29 +97,29 @@ void freeNetwork(NeuralNetwork* network) {
 int feedForwardNetwork(NeuralNetwork* network, Matrix* input) {
     // Feed-forward through all layers
     int errorCode = SUCCESS;
+
+    // Move input values to network->z[0]
+    zeroMatrix(network->z[0]); // TODO: Add error checking here
+    addMatricesInto(network->z[0], input, network->z[0]);
+    // Set activations of network->a[0]
+    sigmoidInto(network->z[0], network->a[0]);
+
     for (int i = 0; i < network->hiddenLayers + 1; i++) {
         Matrix* weights = network->weights[i];
         Matrix* biases = network->biases[i];
         
         // Use input matrix on first iteration, else use the prev. activations
-        if (i == 0) {
-            errorCode = multiplyMatricesInto(weights, input, network->z[i]);
-        } else {
-            errorCode = multiplyMatricesInto(weights, network->a[i-1], network->z[i]);
-        }
+        errorCode = multiplyMatricesInto(weights, network->a[i], network->z[i+1]);
         if (errorCode != SUCCESS) {
             return errorCode;
         }
-        errorCode = addMatricesInto(network->z[i], biases, network->z[i]);
+        errorCode = addMatricesInto(network->z[i+1], biases, network->z[i+1]);
         if (errorCode != SUCCESS) {
             return errorCode;
         }
 
         // Perform activation function on the column matrix
-        sigmoidInto(network->z[i], network->a[i]);
-        if (errorCode != SUCCESS) {
-            return errorCode;
-        }
+        sigmoidInto(network->z[i+1], network->a[i+1]);
     }
     return SUCCESS;
 }
@@ -135,6 +145,8 @@ int feedForwardNetworkImage(NeuralNetwork* network, Image* input) {
 
 int evaluateNetwork(NeuralNetwork* network, Image** images, int numberOfImages,
                     int* correctImages) {
+    int d[10] = {}; // TODO: Remove these
+    int o[10] = {};
     for (int i = 0; i < numberOfImages; i++) {
         // Feedforward
         Image* img = images[i];
@@ -144,20 +156,200 @@ int evaluateNetwork(NeuralNetwork* network, Image** images, int numberOfImages,
         }
         
         // Check result
-        int output = indexOfMaxValue(network->a[network->hiddenLayers]);
+        int output = indexOfMaxValue(network->a[network->hiddenLayers + 1]);
         int expected = (int) img->label; // Convert char to int
-        if (output + 1 == expected) {
+        d[expected]++;
+        o[output]++;
+        if (output == expected) {
             (*correctImages)++;
         }
+    }
+    //printf("---Distribution---\n%i %i %i %i %i %i %i %i %i %i\n", d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7], d[8], d[9]);
+    //printf("---Observed---\n%i %i %i %i %i %i %i %i %i %i\n", o[0], o[1], o[2], o[3], o[4], o[5], o[6], o[7], o[8], o[9]);
+    return SUCCESS;
+}
+
+int trainNetworkMiniBatches(NeuralNetwork* network, int epochs, int miniBatchSize,
+                             Image** trainingImages, int numberOfTrainingImages,
+                             Image** testingImages, int numberOfTestingImages) {
+    
+    if (numberOfTrainingImages % miniBatchSize != 0) {
+        return reportError(MISC, "miniBatchSize must equally divide numberOfTrainingImages");
+    }
+    int numberOfMiniBatches = numberOfTestingImages / miniBatchSize;
+    int returnCode = SUCCESS;
+    // For each epoch
+    for (int e = 0; e < epochs; e++) {
+        // For each mini batch
+        shuffle(trainingImages, numberOfTrainingImages);
+        for (int x = 0; x < numberOfMiniBatches; x++){ // TODO: Line limits of 80 chars
+            // Initialise sum matrices - nablaB and nablaW have same shape of network->weights
+            Matrix** nablaB = malloc((network->hiddenLayers + 1) * sizeof(Matrix));
+            Matrix** nablaW = malloc((network->hiddenLayers + 1) * sizeof(Matrix));
+            if (nablaB == NULL || nablaW == NULL) {
+                return reportError(IMAGE_MALLOC_FAILED, "");
+            }
+            for (int i = 0; i < network->hiddenLayers + 1; i++) {
+                returnCode = makeMatrix(network->neurons[i+1], network->neurons[i], &nablaW[i]);
+                if (returnCode != SUCCESS) {
+                    return returnCode;
+                }
+                returnCode = makeMatrix(network->neurons[i+1], 1, &nablaB[i]);
+                if (returnCode != SUCCESS) {
+                    return returnCode;
+                }
+            }
+
+            for (int i = 0; i < miniBatchSize; i++) {
+                // Forward prop, storing activations and outputs
+                Image* img = trainingImages[miniBatchSize * x + i];
+                returnCode = feedForwardNetworkImage(network, img);
+                if (returnCode != SUCCESS) {
+                    return returnCode;
+                }
+
+                // For each layer
+                Matrix* delta = NULL;
+                for (int l = network->hiddenLayers; l >= 0; l--) {
+                    // Calculate error of output layer
+                    Matrix* sum = network->z[l + 1];
+                    Matrix* output = network->a[l + 1];
+                    Matrix* firstTerm = NULL;
+                    // If output layer, set first term of delta to cost derivative
+                    if (l == network->hiddenLayers) {
+                        returnCode = costDerivative(output, (int) img->label, &firstTerm);
+                        if (returnCode != SUCCESS) {
+                            return returnCode;
+                        }
+                    } else {
+                        Matrix* transposed = NULL;
+                        returnCode = transposeMatrix(network->weights[l+1], &transposed);
+                        if (returnCode != SUCCESS) {
+                            return returnCode;
+                        }
+                        returnCode = makeMatrix(sum->rows, 1, &firstTerm);
+                        if (returnCode != SUCCESS) {
+                            return returnCode;
+                        }
+                        returnCode = multiplyMatricesInto(transposed, delta, firstTerm);
+                        if (returnCode != SUCCESS) {
+                            return returnCode;
+                        }
+                    }
+
+                    //delta = hadamardProduct(firstTerm, sigmoidPrime(sum));
+                    Matrix* sumD = NULL;
+                    returnCode = makeMatrix(sum->rows, 1, &sumD);
+                    if (returnCode != SUCCESS) {
+                        return returnCode;
+                    }
+                    dsigmoidInto(sum, sumD);
+                    
+                    // If delta has already been initialised (if not on the output layer)
+                    if (l != network->hiddenLayers) {
+                        freeMatrix(delta);
+                        delta = NULL;
+                    }
+                    
+                    returnCode = hadamardProduct(firstTerm, sumD, &delta);
+                    if (returnCode != SUCCESS) {
+                        return returnCode;
+                    }
+
+                    //nablaB[outputLayer] += delta
+                    returnCode = addMatricesInto(nablaB[l], delta, nablaB[l]);
+                    if (returnCode != SUCCESS) {
+                        return returnCode;
+                    }
+
+                    //toAddToNablaW = delta dotted w/ a[outputLayer - 1]^T; (where ^T means transpose)
+                    Matrix* toAddToNablaW = NULL;
+                    returnCode = makeMatrix(nablaW[l]->rows, nablaW[l]->columns, &toAddToNablaW);
+                    if (returnCode != SUCCESS) {
+                        return returnCode;
+                    }
+
+                    Matrix* transposed = NULL; // TODO: Make these allocations consistent
+                    returnCode = transposeMatrix(network->a[l], &transposed);
+                    if (returnCode != SUCCESS) {
+                        return returnCode;
+                    }
+                    
+                    returnCode = multiplyMatricesInto(delta, transposed, toAddToNablaW);
+                    if (returnCode != SUCCESS) {
+                        return returnCode;
+                    }
+
+                    //nablaB[outputLayer] += toAddToNablaW
+                    returnCode = addMatricesInto(nablaW[l], toAddToNablaW, nablaW[l]);
+                    if (returnCode != SUCCESS) {
+                        return returnCode;
+                    }
+
+                    // Free used matrices
+                    freeMatrix(firstTerm);
+                    freeMatrix(sumD);
+                    freeMatrix(transposed);
+                    freeMatrix(toAddToNablaW);
+                }
+                freeMatrix(delta);
+            }
+            
+            // For each layer change the weights and biases
+            for (int l = 0; l < network->hiddenLayers + 1; l++) {
+                // Change nablaW to represent -deltaW and nablaB to represent -deltaB
+                multiplyScalarInto(nablaW[l], (double) -network->learningRate/miniBatchSize, nablaW[l]);
+                multiplyScalarInto(nablaB[l], (double) -network->learningRate/miniBatchSize, nablaB[l]);
+                // Add deltaW and deltaB to weights and biases
+                addMatricesInto(network->weights[l], nablaW[l], network->weights[l]);
+                addMatricesInto(network->biases[l], nablaB[l], network->biases[l]);
+
+                /*printf("---nablaW[%i]---", l);
+                printMatrix(nablaW[l]);
+                printf("---nablaB[%i]---", l);
+                printMatrix(nablaB[l]);*/
+            }
+            
+            // Free nablaW and nablaB
+            for (int l = 0; l < network->hiddenLayers + 1; l++) {
+                freeMatrix(nablaB[l]);
+                freeMatrix(nablaW[l]);
+            }
+            // Free pointer arrays
+            free(nablaB);
+            free(nablaW);
+        }
+        int correctImages = 0;
+        returnCode = evaluateNetwork(network, testingImages, numberOfTestingImages,
+                            &correctImages);
+        if (returnCode != SUCCESS) {
+            return SUCCESS;
+        }
+        printf("End of epoch %i NN evaluation:\t%.3lf%% testing accuracy.\n", e+1, (double) 100*correctImages/numberOfTestingImages);
     }
     return SUCCESS;
 }
 
-        // Free image matrix
+int costDerivative(Matrix* a, int y, Matrix** output) {
+    // Allocate expected output vector
+    Matrix* m = NULL;
+    int returnCode = makeMatrix(a->rows, 1, &m);
+    if (returnCode != SUCCESS) {
+        return returnCode;
+    }
+    m->values[y] = -1;
+
+    // Allocate output vector
+    returnCode = makeMatrix(a->rows, 1, output);
+    if (returnCode != SUCCESS) {
+        goto cleanUp;
+    }
+    returnCode = addMatricesInto(a, m, *output);
+    if (returnCode != SUCCESS) {
+        goto cleanUp;
+    }
+    
+    cleanUp:
         freeMatrix(m);
-    }
-    return SUCCESS;
-}
-    }
-    return SUCCESS;
+        return returnCode;
 }

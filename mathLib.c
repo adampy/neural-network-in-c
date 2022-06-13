@@ -36,6 +36,13 @@ int addMatricesInto(Matrix* m1, Matrix* m2, Matrix* result) {
     return SUCCESS;
 }
 
+int multiplyScalarInto(Matrix* m1, double scalar, Matrix* result) {
+    for (int i = 0; i < m1->rows * m1->columns; i++) {
+        result->values[i] = scalar * m1->values[i];
+    }
+    return SUCCESS;
+}
+
 int multiplyMatricesInto(Matrix* m1, Matrix* m2, Matrix* result) {
     // Check dimensions
     if (m1->columns != m2->rows) {
@@ -90,13 +97,13 @@ int hadamardProduct(Matrix* m1, Matrix* m2, Matrix** result) {
         return reportError(MISC, "hadamardProduct error: must have same dimensions");
     }
 
-    // Create matrix
     if (*result == NULL) {
         int made = makeMatrix(m1->rows, m1->columns, result);
         if (made != SUCCESS) {
             return made;
         }
     }
+    // TODO: Ensure result matrix has appropriate dimensions
 
     // Move hadamard products into result vector
     for (int i = 0; i < m1->rows * m1->columns; i++) {
@@ -136,9 +143,12 @@ void sigmoidInto(Matrix* m, Matrix* output) {
         output->values[i] = 1/(1+exp(-x));
     }
 }
-double dsigmoid(int x) {
-    double s = 1/(1+exp(-x));
-    return s*(1-s);
+void dsigmoidInto(Matrix* m, Matrix* output) { // Expects column matrix
+    for (int i = 0 ; i < m->rows; i++) {
+        double x = m->values[i];
+        double s = 1/(1+exp(-x));
+        output->values[i] = s*(1-s);
+    }
 }
 
 // --- Backpropagation functions ---

@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "image.h"
 #include "mathLib.h"
@@ -30,5 +32,18 @@ void printNetwork(NeuralNetwork* network) {
                                              network->weights[i]->columns, i,
                                              network->biases[i]->rows,
                                              network->biases[i]->columns);
+    }
+}
+
+void shuffle(Image** array, int n) {
+    srand(time(NULL));
+
+    if (n > 1) {
+        for (int i = n - 1; i > 0; i--) {
+            int j = (unsigned int) (((double)rand()/RAND_MAX)*(i+1));
+            Image* t = array[j];
+            array[j] = array[i];
+            array[i] = t;
+        }
     }
 }

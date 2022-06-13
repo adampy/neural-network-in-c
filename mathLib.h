@@ -12,6 +12,7 @@ int makeMatrix(unsigned int rows, unsigned int columns, Matrix** m);
 int freeMatrix(Matrix* m);
 
 int addMatricesInto(Matrix* m1, Matrix* m2, Matrix* result);
+int multiplyScalarInto(Matrix* m1, double scalar, Matrix* result);
 int multiplyMatricesInto(Matrix* m1, Matrix* m2, Matrix* result);
 int transposeMatrix(Matrix* m1, Matrix** result);
 int hadamardProduct(Matrix* m1, Matrix* m2, Matrix** result);
@@ -23,7 +24,7 @@ void zeroMatrix(Matrix* m);
 void reluInto(Matrix* m, Matrix* output);
 double drelu(int x);
 void sigmoidInto(Matrix* m, Matrix* output);
-double dsigmoid(int x);
+void dsigmoidInto(Matrix* m, Matrix* output);
 
 // --- Backpropagation functions ---
 int meanSquaredError(Matrix* actual, int expected);

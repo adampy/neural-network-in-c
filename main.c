@@ -7,6 +7,9 @@
 #include "imageInput.h"
 #include "err.h"
 
+#define LEARNING_RATE 3
+#define EPOCHS 50
+#define MINI_BATCH_SIZE 10 // 1 is SGD, anything else is mini-batch gradient descent
 
 /**
  * argv = {main, trainingDatasetFilename, trainingLabelsFilename,
@@ -37,31 +40,48 @@ int main(int argc, char** argv) {
         goto cleanUp;
     }
 
+    // Set up NN
+    NeuralNetwork* network = NULL;
+    unsigned int neurons[4] = {784, 50, 20, 10};
+    returnCode = makeNetwork(2, neurons, LEARNING_RATE, &network);
+    if (returnCode != SUCCESS) {
+        goto cleanUp;
+    }
+
     // Choose random image
     /*srand(time(NULL));
-    Image* img = images[rand() % numberOfImages];
+    Image* img = testingImages[rand() % numberOfTestingImages];
     //printImage(img);
     Matrix* m = NULL;
     returnCode = getMatrixFromImage(img, &m);
     if (returnCode != SUCCESS) {
         goto cleanUp;
-    }*/
-
-    // Set up NN
-    NeuralNetwork* network = NULL;
-    unsigned int neurons[4] = {784, 20, 20, 10};
-    returnCode = makeNetwork(2, neurons, 1, &network);
-    if (returnCode != SUCCESS) {
-        goto cleanUp;
     }
+    feedForwardNetworkImage(network, img);
+    printf("---z[3]---\n");
+    printMatrix(network->z[3]);
+    printf("---a[3]---\n");
+    printMatrix(network->a[3]);
+    Matrix* costD = NULL;
+    costDerivative(network->a[3], (int)img->label - 1, &costD);
+    printf("---Cost derivative---\n");
+    printMatrix(costD);*/
 
+    // --- Evaluate once ---
     int correctImages = 0;
     returnCode = evaluateNetwork(network, testingImages, numberOfTestingImages,
                         &correctImages);
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }
-    printf("NN evaluation: %i / %i\n", correctImages, numberOfTestingImages);
+
+    printf("Initial NN evaluation:\t\t\t%.3lf%% testing accuracy.\n", (double) 100*correctImages/numberOfTestingImages);
+    returnCode = trainNetworkMiniBatches(network, EPOCHS, MINI_BATCH_SIZE, trainingImages,
+                                         numberOfTrainingImages,testingImages,
+                                         numberOfTestingImages);
+    if (returnCode != SUCCESS) {
+        goto cleanUp;
+    }
 
     // Cleanup and exit execution
     cleanUp:

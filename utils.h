@@ -8,5 +8,6 @@
 void printImage(Image* img);
 void printMatrix(Matrix* m);
 void printNetwork(NeuralNetwork* network);
+void shuffle(Image** array, int n);
 
 #endif // UTILS
