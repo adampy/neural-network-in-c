@@ -10,6 +10,8 @@
 #define LEARNING_RATE 3
 #define EPOCHS 50
 #define MINI_BATCH_SIZE 10 // 1 is SGD, anything else is mini-batch gradient descent
+#define HIDDEN_LAYERS 2
+unsigned int neurons[4] = {784, 30, 30, 10};
 
 /**
  * argv = {main, trainingDatasetFilename, trainingLabelsFilename,
@@ -42,33 +44,21 @@ int main(int argc, char** argv) {
 
     // Set up NN
     NeuralNetwork* network = NULL;
-    //unsigned int neurons[4] = {784, 20, 20, 10};
-    //int hiddenLayers = 2;
-    unsigned int neurons[4] = {784, 30, 30, 10};
-    int hiddenLayers = 2;
-    returnCode = makeNetwork(hiddenLayers, neurons, LEARNING_RATE, &network);
+    returnCode = makeNetwork(HIDDEN_LAYERS, neurons, LEARNING_RATE, &network);
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }
+    network->trainingImages = trainingImages;
+    network->numberOfTrainingImages = numberOfTrainingImages;
+    network->testingImages = testingImages;
+    network->numberOfTestingImages = numberOfTestingImages;
 
-    // Choose random image
-    srand(time(NULL));
-    Image* img = testingImages[rand() % numberOfTestingImages];
-    //printImage(img);
-    Matrix* m = NULL;
-    returnCode = getMatrixFromImage(img, &m);
-    if (returnCode != SUCCESS) {
-        goto cleanUp;
-    }
-    feedForwardNetworkImage(network, img);
     // --- Evaluate once ---
-    returnCode = evaluateNetwork(network, testingImages, numberOfTestingImages, "Initial");
+    returnCode = evaluateNetwork(network, "Initial");
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }
-    returnCode = trainNetworkMiniBatches(network, EPOCHS, MINI_BATCH_SIZE, trainingImages,
-                                         numberOfTrainingImages,testingImages,
-                                         numberOfTestingImages);
+    returnCode = trainNetworkMiniBatches(network, EPOCHS, MINI_BATCH_SIZE);
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }

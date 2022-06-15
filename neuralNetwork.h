@@ -14,6 +14,11 @@ typedef struct _NeuralNetwork {
     Matrix** biases;
     Matrix** z; // Stores the summed inputs of each neuron for each layer
     Matrix** a; // Stores activation of each neuron for each layer
+
+    Image** trainingImages;
+    unsigned int numberOfTrainingImages;
+    Image** testingImages;
+    unsigned int numberOfTestingImages;
 } NeuralNetwork;
 
 /**
@@ -47,12 +52,12 @@ int feedForwardNetwork(NeuralNetwork* network, Matrix* input);
 int feedForwardNetworkImage(NeuralNetwork* network, Image* input);
 
 /**
- * Evalutes a neural network using the given array of images, `images`. The
- * neural network's output is taken to be whichever output neuron is the
- * biggest. `string` is added to the output of this function.
+ * Evalutes a neural network using the given array of images, 
+ * `network->testingImages`. The neural network's output is
+ * taken to be whichever output neuron is the biggest. `string`
+ * is added to the output of this function.
  */
-int evaluateNetwork(NeuralNetwork* network, Image** images, int numberOfImages,
-                    char* string);
+int evaluateNetwork(NeuralNetwork* network, char* string);
 
 /**
  * Changes the weights and biases of `network` in regards to a single `input`
@@ -68,9 +73,7 @@ int backpropSingleInput(NeuralNetwork* network, Matrix* input);
  * completion. Training images are provided for training and testing images
  * are provided for evaluating the network at the end of each epoch.
  */
-int trainNetworkMiniBatches(NeuralNetwork* network, int epochs, int miniBatchSize,
-                             Image** trainingImages, int numberOfTrainingImages,
-                             Image** testingImages, int numberOfTestingImages); // TODO: Change ints to unsigned if necessary
+int trainNetworkMiniBatches(NeuralNetwork* network, int epochs, int miniBatchSize); // TODO: Change ints to unsigned if necessary
 
 /**
  * Gets the cost derivative of the network, which is a column vector of:

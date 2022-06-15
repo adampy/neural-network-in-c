@@ -147,8 +147,7 @@ int feedForwardNetworkImage(NeuralNetwork* network, Image* input) {
     return SUCCESS; 
 }
 
-int evaluateNetwork(NeuralNetwork* network, Image** images, int numberOfImages,
-                    char* string) {
+int evaluateNetwork(NeuralNetwork* network, char* string) {
     int outputNeurons = network->neurons[network->hiddenLayers + 1];
     int correctImages = 0;
     double cost = 0;
@@ -158,9 +157,9 @@ int evaluateNetwork(NeuralNetwork* network, Image** images, int numberOfImages,
         return reportError(IMAGE_MALLOC_FAILED, "");
     }
 
-    for (int i = 0; i < numberOfImages; i++) {
+    for (int i = 0; i < network->numberOfTestingImages; i++) {
         // Feedforward
-        Image* img = images[i];
+        Image* img = network->testingImages[i];
         int returnCode = feedForwardNetworkImage(network, img);
         if (returnCode != SUCCESS) {
             goto cleanUp; // TODO: Change all errorCode vars to returnCode
@@ -182,10 +181,10 @@ int evaluateNetwork(NeuralNetwork* network, Image** images, int numberOfImages,
             goto cleanUp;
         }
     }
-    cost /= numberOfImages;
+    cost /= network->numberOfTestingImages;
 
     printf("----NETWORK EVALUATION (%s)----\n", string);
-    printf("%.3lf%% testing accuracy\n", (double) 100*correctImages/numberOfImages);
+    printf("%.3lf%% testing accuracy\n", (double) 100*correctImages/network->numberOfTestingImages);
     printf("%.3lf cost\n", cost);
 
     // For each output neuron, print its accuracy
@@ -199,21 +198,21 @@ int evaluateNetwork(NeuralNetwork* network, Image** images, int numberOfImages,
         return SUCCESS;
 }
 
-int trainNetworkMiniBatches(NeuralNetwork* network, int epochs, int miniBatchSize,
-                             Image** trainingImages, int numberOfTrainingImages,
-                             Image** testingImages, int numberOfTestingImages) {
-    
-    if (numberOfTrainingImages % miniBatchSize != 0) {
+int trainNetworkMiniBatches(NeuralNetwork* network, int epochs, int miniBatchSize) {
+    // Check mini batch size
+    if (network->numberOfTrainingImages % miniBatchSize != 0) {
         return reportError(MISC, "miniBatchSize must equally divide numberOfTrainingImages");
     }
-    int numberOfMiniBatches = numberOfTestingImages / miniBatchSize;
+    
+    // Initialise variables
+    int numberOfMiniBatches = network->numberOfTestingImages / miniBatchSize;
     int returnCode = SUCCESS;
     int H = network->hiddenLayers;
 
     // For each epoch
     for (int e = 0; e < epochs; e++) {
         // For each mini batch
-        shuffle(trainingImages, numberOfTrainingImages);
+        shuffle(network->trainingImages, network->numberOfTrainingImages);
         for (int x = 0; x < numberOfMiniBatches; x++){ // TODO: Line limits of 80 chars
             // Initialise sum matrices - nablaB and nablaW have same shape of network->weights
             Matrix** nablaB = malloc((H + 1) * sizeof(Matrix));
@@ -234,7 +233,7 @@ int trainNetworkMiniBatches(NeuralNetwork* network, int epochs, int miniBatchSiz
 
             for (int i = 0; i < miniBatchSize; i++) {
                 // Forward prop, storing activations and outputs
-                Image* img = trainingImages[miniBatchSize * x + i];
+                Image* img = network->trainingImages[miniBatchSize * x + i];
                 returnCode = feedForwardNetworkImage(network, img);
                 if (returnCode != SUCCESS) {
                     return returnCode;
@@ -351,8 +350,7 @@ int trainNetworkMiniBatches(NeuralNetwork* network, int epochs, int miniBatchSiz
 
         char string[128] = "";
         sprintf(string, "End of epoch %d", e);
-        returnCode = evaluateNetwork(network, testingImages, numberOfTestingImages,
-                            string);
+        returnCode = evaluateNetwork(network, string);
         if (returnCode != SUCCESS) {
             return SUCCESS;
         }
