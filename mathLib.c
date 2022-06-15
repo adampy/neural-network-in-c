@@ -26,9 +26,11 @@ int freeMatrix(Matrix* m) {
 int addMatricesInto(Matrix* m1, Matrix* m2, Matrix* result) {
     // Check dimensions
     if (m1->rows != m2->rows || m1->columns != m2->columns) {
-        return reportError(MISC, "addMatrices error: must have same dimensions");
+        return reportError(MISC, "addMatricesInto error: must have same dimensions");
     }
-    // TODO: Ensure result matrix has appropriate dimensions
+    if (m1->rows != result->rows || m1->columns != result->columns) {
+        return reportError(MISC, "addMatricesInto error: result matrix doesn't have appropriate dimensions");
+    }
 
     // Move addition into result vector
     for (int i = 0; i < m1->rows * m1->columns; i++) {
@@ -47,9 +49,11 @@ int multiplyScalarInto(Matrix* m1, double scalar, Matrix* result) {
 int multiplyMatricesInto(Matrix* m1, Matrix* m2, Matrix* result) {
     // Check dimensions
     if (m1->columns != m2->rows) {
-        return reportError(MISC, "multiplyMatrices error:  matrices cannot be multiplied");
+        return reportError(MISC, "multiplyMatricesInto error:  matrices cannot be multiplied");
     }
-    // TODO: Ensure result matrix has appropriate dimensions
+    if (m1->rows != result->rows || m2->columns != result->columns) {
+        return reportError(MISC, "multiplyMatricesInto error: result matrix doesn't have appropriate dimensions");
+    }
 
     for (int i = 0; i < m2->columns; i++) {
         for (int j = 0; j < m1->rows; j++) {
@@ -98,7 +102,6 @@ int hadamardProduct(Matrix* m1, Matrix* m2, Matrix** result) {
             return made;
         }
     }
-    // TODO: Ensure result matrix has appropriate dimensions
 
     // Move hadamard products into result vector
     for (int i = 0; i < m1->rows * m1->columns; i++) {
@@ -108,10 +111,9 @@ int hadamardProduct(Matrix* m1, Matrix* m2, Matrix** result) {
 }
 
 void randomiseMatrix(Matrix* m) {
-    // Assign random values to matrices from -2 to 2 TODO: Dynamic range
     srand(time(NULL));
     for (int i = 0; i < m->rows * m->columns; i++) {
-        m->values[i] = randn(); //4 * ((double) rand() / RAND_MAX) - 2;
+        m->values[i] = randn();
     }
 }
 
@@ -128,44 +130,66 @@ void negateMatrix(Matrix* m) {
 }
 
 // --- Activation functions ---
-void reluInto(Matrix* m, Matrix* output) { // Expects column matrix
-    for (int i = 0; i < m->rows; i++) {
+int reluInto(Matrix* m, Matrix* output) {
+    if (m->rows != output->rows || m->columns != output->columns) {
+        return reportError(MISC, "reluInto error: output matrix must have the same dimensions as the input");
+    }
+
+    for (int i = 0; i < m->rows * m->columns; i++) {
         double x = m->values[i];
         output->values[i] = (double) x * (x > 0);
     }
+    return SUCCESS;
 }
-double drelu(int x) {
-    return x > 0;
+int dreluInto(Matrix* m, Matrix* output) {
+    if (m->rows != output->rows || m->columns != output->columns) {
+        return reportError(MISC, "dreluInto error: output matrix must have the same dimensions as the input");
+    }
+    
+    for (int i = 0 ; i < m->rows * m->columns; i++) {
+        output->values[i] = (m->values[i] > 0);
+    }
+    return SUCCESS;
 }
 
-void sigmoidInto(Matrix* m, Matrix* output) {
-    for (int i = 0; i < m->rows; i++) {
+int sigmoidInto(Matrix* m, Matrix* output) {
+    if (m->rows != output->rows || m->columns != output->columns) {
+        return reportError(MISC, "sigmoidInto error: output matrix must have the same dimensions as the input");
+    }
+
+    for (int i = 0; i < m->rows * m->columns; i++) {
         double x = m->values[i];
         output->values[i] = 1/(1+exp(-x));
     }
+    return SUCCESS;
 }
-void dsigmoidInto(Matrix* m, Matrix* output) { // Expects column matrix
-    for (int i = 0 ; i < m->rows; i++) {
+int dsigmoidInto(Matrix* m, Matrix* output) {
+    if (m->rows != output->rows || m->columns != output->columns) {
+        return reportError(MISC, "dsigmoidInto error: output matrix must have the same dimensions as the input");
+    }
+
+    for (int i = 0 ; i < m->rows * m->columns; i++) {
         double x = m->values[i];
         double s = 1/(1+exp(-x));
         output->values[i] = s*(1-s);
     }
+    return SUCCESS;
 }
 
-// --- Backpropagation functions ---
-int meanSquaredError(Matrix* actual, int expected);
-
 // --- Helper functions ---
-int indexOfMaxValue(Matrix* m) { // Expects column matrix TODO: Add this as err
-    int indx = 0;
+int indexOfMaxValue(Matrix* m, int* indx) {
+    if (m->columns != 1) {
+        return reportError(MISC, "indexOfMaxValue error: input matrix must have 1 column");
+    }
+
     double max = -1;
     for (int i = 0; i < m->rows; i++) {
         if (m->values[i] > max) {
-            indx = i;
+            *indx = i;
             max = m->values[i];
         }
     }
-    return indx;
+    return SUCCESS;
 }
 
 double randn() {

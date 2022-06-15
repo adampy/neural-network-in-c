@@ -22,17 +22,13 @@ void zeroMatrix(Matrix* m);
 void negateMatrix(Matrix* m);
 
 // --- Activation functions ---
-void reluInto(Matrix* m, Matrix* output);
-double drelu(int x);
-void sigmoidInto(Matrix* m, Matrix* output);
-void dsigmoidInto(Matrix* m, Matrix* output);
-
-// --- Backpropagation functions ---
-int meanSquaredError(Matrix* actual, int expected);
-#endif // MATH_LIB
+int reluInto(Matrix* m, Matrix* output);
+int dreluInto(Matrix* m, Matrix* output);
+int sigmoidInto(Matrix* m, Matrix* output);
+int dsigmoidInto(Matrix* m, Matrix* output);
 
 // --- Helper functions ---
-int indexOfMaxValue(Matrix* m);
+int indexOfMaxValue(Matrix* m, int* indx);
 
 /**
  * Generates a random number from the standard normal distribution
@@ -40,3 +36,5 @@ int indexOfMaxValue(Matrix* m);
  * Ziggurat method could be used but this method is easier to implement. // TODO: Try implementing Ziggurat method
  */
 double randn();
+
+#endif // MATH_LIB

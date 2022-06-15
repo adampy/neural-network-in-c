@@ -73,7 +73,16 @@ int backpropSingleInput(NeuralNetwork* network, Matrix* input);
  * completion. Training images are provided for training and testing images
  * are provided for evaluating the network at the end of each epoch.
  */
-int trainNetworkMiniBatches(NeuralNetwork* network, int epochs, int miniBatchSize); // TODO: Change ints to unsigned if necessary
+int trainNetworkMiniBatches(NeuralNetwork* network, unsigned int epochs, unsigned int miniBatchSize);
+
+/**
+ * Trains a single image `img` on the network `network`. The two matrix arrays
+ * `nablaW` and `nablaB` are summations for how much the weights and biases
+ * need to be changed at the end of each mini batch. They are indexed by
+ * layer, and have the same shape as `network->weights` and
+ * `network->biases` respectively.
+ */
+int trainNetworkSingleImage(NeuralNetwork* network, Image* img, Matrix** nablaW, Matrix** nablaB);
 
 /**
  * Gets the cost derivative of the network, which is a column vector of:
@@ -81,7 +90,7 @@ int trainNetworkMiniBatches(NeuralNetwork* network, int epochs, int miniBatchSiz
  * of a quadratic cost function. Parameter `y` represents the index of the
  * correct/expected ouptut. The cost derivative is placed into a new output
  * vector `output` - it should be a null pointer, and is allocated in this
- * function. // TODO: Make output vector allocation consistent
+ * function.
  */
 int costDerivative(Matrix* a, int y, Matrix** output);
 
