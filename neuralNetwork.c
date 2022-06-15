@@ -7,6 +7,17 @@
 
 #include <stdio.h>
 
+//Regular text
+#define BLK "\e[1;30m"
+#define RED "\e[1;31m"
+#define GRN "\e[1;32m"
+#define YEL "\e[1;33m"
+#define BLU "\e[1;34m"
+#define MAG "\e[1;35m"
+#define CYN "\e[1;36m"
+#define WHT "\e[1;37m"
+#define CLR "\e[0;0m"
+
 int makeNetwork(unsigned int hiddenLayers, unsigned int* neurons,
                 double learningRate, NeuralNetwork** network) {
     // Allocate memory
@@ -192,13 +203,13 @@ int evaluateNetwork(NeuralNetwork* network, char* string) {
     }
     cost /= network->numberOfTestingImages;
 
-    printf("----NETWORK EVALUATION (%s)----\n", string);
-    printf("%.3lf%% testing accuracy\n", (double) 100*correctImages/network->numberOfTestingImages);
-    printf("%.3lf cost\n", cost);
+    printf(RED "----NETWORK EVALUATION (%s)----\n" CLR, string);
+    printf(GRN "%.3lf%%" CLR " testing accuracy\n", (double) 100*correctImages/network->numberOfTestingImages);
+    printf(GRN "%.3lf" CLR " cost\n", cost);
 
     // For each output neuron, print its accuracy
     for (int i = 0; i < outputNeurons; i++) {
-        printf("Neuron %i accuracy: %3.lf%%\n", i, (double) 100 * o[i] / e[i]);
+        printf("Neuron %i accuracy: " BLU "%3.lf%%" CLR "\n", i, (double) 100 * o[i] / e[i]);
     }
 
     cleanUp:

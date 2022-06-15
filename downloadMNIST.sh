@@ -7,8 +7,6 @@ testingImages="t10k-images-idx3-ubyte";
 testingLabels="t10k-labels-idx1-ubyte";
 datasets=("${trainingImages}" "${trainingLabels}" "${testingImages}" "${testingLabels}");
 
-echo "Downloading MNIST dataset...";
-
 # Make dataset directory and enter it
 if [ ! -d "dataset" ]; then
     mkdir dataset;
@@ -24,5 +22,3 @@ for i in {0..3}; do
     fi
 done
 cd ..;
-
-echo "MNIST dataset downloaded!";
