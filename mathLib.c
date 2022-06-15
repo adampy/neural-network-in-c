@@ -13,6 +13,7 @@ int makeMatrix(unsigned int rows, unsigned int columns, Matrix** m) {
     (*m)->rows = rows;
     (*m)->columns = columns;
     (*m)->values = calloc(rows*columns, sizeof(double));
+    zeroMatrix(*m);
     return SUCCESS;
 }
 
@@ -49,12 +50,6 @@ int multiplyMatricesInto(Matrix* m1, Matrix* m2, Matrix* result) {
         return reportError(MISC, "multiplyMatrices error:  matrices cannot be multiplied");
     }
     // TODO: Ensure result matrix has appropriate dimensions
-    
-    // Apply matrix multiplication
-    // for m2 columns
-    // for m1 rows
-    // add elements with offset of 0
-    // then 
 
     for (int i = 0; i < m2->columns; i++) {
         for (int j = 0; j < m1->rows; j++) {
@@ -84,7 +79,7 @@ int transposeMatrix(Matrix* m1, Matrix** result) {
     for (int i = 0; i < m1->rows; i++) {
         for (int j = 0; j < m1->columns; j++) {
             int originalIndex = i * m1->columns + j;
-            int toIndex = j * m1 -> rows + i;
+            int toIndex = j * m1->rows + i;
             (*result)->values[toIndex] = m1->values[originalIndex];
         }
     }
@@ -116,7 +111,7 @@ void randomiseMatrix(Matrix* m) {
     // Assign random values to matrices from -2 to 2 TODO: Dynamic range
     srand(time(NULL));
     for (int i = 0; i < m->rows * m->columns; i++) {
-        m->values[i] = 4 * ((double) rand() / RAND_MAX) - 2;
+        m->values[i] = randn(); //4 * ((double) rand() / RAND_MAX) - 2;
     }
 }
 
@@ -165,4 +160,25 @@ int indexOfMaxValue(Matrix* m) { // Expects column matrix TODO: Add this as err
         }
     }
     return indx;
+}
+
+double randn() {
+    static double spare;
+    static int hasSpare = 0;
+
+    if (hasSpare == 1) {
+        hasSpare = 0;
+        return spare;
+    } else {
+        double u, v, s;
+        do {
+            u = ((double) rand() / RAND_MAX) * 2.0 - 1.0; // [0, 1] -> [-1, 1]
+            v = ((double) rand() / RAND_MAX) * 2.0 - 1.0;
+            s = u * u + v * v;
+        } while (s >= 1.0 || s == 0.0);
+        s = sqrt(-2.0 * log(s) / s);
+        spare = v * s;
+        hasSpare = 1;
+        return u * s;
+    }
 }

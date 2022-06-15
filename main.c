@@ -42,14 +42,17 @@ int main(int argc, char** argv) {
 
     // Set up NN
     NeuralNetwork* network = NULL;
-    unsigned int neurons[4] = {784, 50, 20, 10};
-    returnCode = makeNetwork(2, neurons, LEARNING_RATE, &network);
+    //unsigned int neurons[4] = {784, 20, 20, 10};
+    //int hiddenLayers = 2;
+    unsigned int neurons[3] = {784, 30, 10};
+    int hiddenLayers = 1;
+    returnCode = makeNetwork(hiddenLayers, neurons, LEARNING_RATE, &network);
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }
 
     // Choose random image
-    /*srand(time(NULL));
+    srand(time(NULL));
     Image* img = testingImages[rand() % numberOfTestingImages];
     //printImage(img);
     Matrix* m = NULL;
@@ -58,15 +61,6 @@ int main(int argc, char** argv) {
         goto cleanUp;
     }
     feedForwardNetworkImage(network, img);
-    printf("---z[3]---\n");
-    printMatrix(network->z[3]);
-    printf("---a[3]---\n");
-    printMatrix(network->a[3]);
-    Matrix* costD = NULL;
-    costDerivative(network->a[3], (int)img->label - 1, &costD);
-    printf("---Cost derivative---\n");
-    printMatrix(costD);*/
-
     // --- Evaluate once ---
     int correctImages = 0;
     returnCode = evaluateNetwork(network, testingImages, numberOfTestingImages,
@@ -74,7 +68,6 @@ int main(int argc, char** argv) {
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }
-
     printf("Initial NN evaluation:\t\t\t%.3lf%% testing accuracy.\n", (double) 100*correctImages/numberOfTestingImages);
     returnCode = trainNetworkMiniBatches(network, EPOCHS, MINI_BATCH_SIZE, trainingImages,
                                          numberOfTrainingImages,testingImages,

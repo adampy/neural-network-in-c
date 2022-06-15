@@ -19,7 +19,7 @@ void printImage(Image* img) {
 void printMatrix(Matrix* m) {
     for (int i = 0; i < m->rows; i++) {
         for (int j = 0; j < m->columns; j++) {
-            printf("%.3lf\t", m->values[i * m->columns + j]);
+            printf("%.10lf\t", m->values[i * m->columns + j]);
         }
         printf("\n");
     }

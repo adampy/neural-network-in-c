@@ -224,7 +224,7 @@ int getMatrixFromImage(Image* img, Matrix** output) {
     // Move data from `img` into `output`
     for (int i = 0; i < img->rows; i++) {
         for (int j = 0; j < img->columns; j++) {
-            (*output)->values[i * img->columns + j] = img->imageData[i][j];
+            (*output)->values[i * img->columns + j] = (double) ((int) img->imageData[i][j]) / 256; // Converts down 0-256 to 0-1
         }
     }
     return SUCCESS;

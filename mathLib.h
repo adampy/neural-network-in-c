@@ -32,3 +32,10 @@ int meanSquaredError(Matrix* actual, int expected);
 
 // --- Helper functions ---
 int indexOfMaxValue(Matrix* m);
+
+/**
+ * Generates a random number from the standard normal distribution
+ * using the Marsaglia polar method. A faster method like the
+ * Ziggurat method could be used but this method is easier to implement. // TODO: Try implementing Ziggurat method
+ */
+double randn();
