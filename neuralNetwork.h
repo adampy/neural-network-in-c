@@ -49,11 +49,10 @@ int feedForwardNetworkImage(NeuralNetwork* network, Image* input);
 /**
  * Evalutes a neural network using the given array of images, `images`. The
  * neural network's output is taken to be whichever output neuron is the
- * biggest. The number of correctly classified images is stored in
- * `correctImages`.
+ * biggest. `string` is added to the output of this function.
  */
 int evaluateNetwork(NeuralNetwork* network, Image** images, int numberOfImages,
-                    int* correctImages);
+                    char* string);
 
 /**
  * Changes the weights and biases of `network` in regards to a single `input`
@@ -82,5 +81,11 @@ int trainNetworkMiniBatches(NeuralNetwork* network, int epochs, int miniBatchSiz
  * function. // TODO: Make output vector allocation consistent
  */
 int costDerivative(Matrix* a, int y, Matrix** output);
+
+/**
+ * Adds the cost of the networks output `networkOutput` when the expeccted
+ * output is `correctIndex` into the output vector `cost`.
+ */
+int costFunction(Matrix* networkOutput, int correctIndex, double* cost);
 
 #endif // NEURAL_NETWORK

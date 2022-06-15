@@ -121,6 +121,12 @@ void zeroMatrix(Matrix* m) {
     }
 }
 
+void negateMatrix(Matrix* m) {
+    for (int i = 0; i < m->rows * m->columns; i++) {
+        m->values[i] = -m->values[i];
+    }
+}
+
 // --- Activation functions ---
 void reluInto(Matrix* m, Matrix* output) { // Expects column matrix
     for (int i = 0; i < m->rows; i++) {

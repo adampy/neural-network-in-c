@@ -44,8 +44,8 @@ int main(int argc, char** argv) {
     NeuralNetwork* network = NULL;
     //unsigned int neurons[4] = {784, 20, 20, 10};
     //int hiddenLayers = 2;
-    unsigned int neurons[3] = {784, 30, 10};
-    int hiddenLayers = 1;
+    unsigned int neurons[4] = {784, 30, 30, 10};
+    int hiddenLayers = 2;
     returnCode = makeNetwork(hiddenLayers, neurons, LEARNING_RATE, &network);
     if (returnCode != SUCCESS) {
         goto cleanUp;
@@ -62,13 +62,10 @@ int main(int argc, char** argv) {
     }
     feedForwardNetworkImage(network, img);
     // --- Evaluate once ---
-    int correctImages = 0;
-    returnCode = evaluateNetwork(network, testingImages, numberOfTestingImages,
-                        &correctImages);
+    returnCode = evaluateNetwork(network, testingImages, numberOfTestingImages, "Initial");
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }
-    printf("Initial NN evaluation:\t\t\t%.3lf%% testing accuracy.\n", (double) 100*correctImages/numberOfTestingImages);
     returnCode = trainNetworkMiniBatches(network, EPOCHS, MINI_BATCH_SIZE, trainingImages,
                                          numberOfTrainingImages,testingImages,
                                          numberOfTestingImages);

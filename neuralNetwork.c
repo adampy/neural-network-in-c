@@ -148,23 +148,55 @@ int feedForwardNetworkImage(NeuralNetwork* network, Image* input) {
 }
 
 int evaluateNetwork(NeuralNetwork* network, Image** images, int numberOfImages,
-                    int* correctImages) {
+                    char* string) {
+    int outputNeurons = network->neurons[network->hiddenLayers + 1];
+    int correctImages = 0;
+    double cost = 0;
+    int* o = calloc(outputNeurons, sizeof(int)); // Stores number of correct outputs for each digit
+    int* e = calloc(outputNeurons, sizeof(int)); // Stores expected outputs TODO: Make dynamic
+    if (o == NULL || e == NULL) {
+        return reportError(IMAGE_MALLOC_FAILED, "");
+    }
+
     for (int i = 0; i < numberOfImages; i++) {
         // Feedforward
         Image* img = images[i];
         int returnCode = feedForwardNetworkImage(network, img);
         if (returnCode != SUCCESS) {
-            return returnCode; // TODO: Change all errorCode vars to returnCode
+            goto cleanUp; // TODO: Change all errorCode vars to returnCode
         }
+        Matrix* networkOutput = network->a[network->hiddenLayers + 1];
         
         // Check result
-        int output = indexOfMaxValue(network->a[network->hiddenLayers + 1]);
+        int output = indexOfMaxValue(networkOutput);
         int expected = (int) img->label; // Convert char to int
+        e[expected]++;
         if (output == expected) {
-            (*correctImages)++;
+            o[output]++;
+            correctImages++;
+        }
+
+        // Work out cost
+        returnCode = costFunction(networkOutput, (int) img->label, &cost);
+        if (returnCode != SUCCESS) {
+            goto cleanUp;
         }
     }
-    return SUCCESS;
+    cost /= numberOfImages;
+
+    printf("----NETWORK EVALUATION (%s)----\n", string);
+    printf("%.3lf%% testing accuracy\n", (double) 100*correctImages/numberOfImages);
+    printf("%.3lf cost\n", cost);
+
+    // For each output neuron, print its accuracy
+    for (int i = 0; i < outputNeurons; i++) {
+        printf("Neuron %i accuracy: %3.lf%%\n", i, (double) 100 * o[i] / e[i]);
+    }
+
+    cleanUp:
+        free(o);
+        free(e);
+        return SUCCESS;
 }
 
 int trainNetworkMiniBatches(NeuralNetwork* network, int epochs, int miniBatchSize,
@@ -316,13 +348,14 @@ int trainNetworkMiniBatches(NeuralNetwork* network, int epochs, int miniBatchSiz
             free(nablaB);
             free(nablaW);
         }
-        int correctImages = 0;
+
+        char string[128] = "";
+        sprintf(string, "End of epoch %d", e);
         returnCode = evaluateNetwork(network, testingImages, numberOfTestingImages,
-                            &correctImages);
+                            string);
         if (returnCode != SUCCESS) {
             return SUCCESS;
         }
-        printf("End of epoch %i NN evaluation:\t%.3lf%% testing accuracy.\n", e+1, (double) 100*correctImages/numberOfTestingImages);
     }
     return SUCCESS;
 }
@@ -349,4 +382,24 @@ int costDerivative(Matrix* a, int y, Matrix** output) {
     cleanUp:
         freeMatrix(m);
         return returnCode;
+}
+
+int costFunction(Matrix* networkOutput, int correctIndex, double* cost) {
+    // Allocate expected output vector
+    Matrix* y = NULL;
+    int returnCode = makeMatrix(networkOutput->rows, 1, &y);
+    if (returnCode != SUCCESS) {
+        return returnCode;
+    }
+    y->values[correctIndex] = 1;
+
+    // Cost = correctMatrix - networkOutput
+    negateMatrix(networkOutput); // This changes the value of networkOutput - need to change back afterwards
+    // Add cost and get MSE
+    for (int i = 0; i < networkOutput->rows; i++) {
+        *cost += (networkOutput->values[i] - y->values[i]) * (networkOutput->values[i] - y->values[i]) / 2;
+    }
+    negateMatrix(networkOutput);
+    freeMatrix(y);
+    return returnCode;
 }

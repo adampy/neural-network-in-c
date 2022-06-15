@@ -19,6 +19,7 @@ int hadamardProduct(Matrix* m1, Matrix* m2, Matrix** result);
 
 void randomiseMatrix(Matrix* m);
 void zeroMatrix(Matrix* m);
+void negateMatrix(Matrix* m);
 
 // --- Activation functions ---
 void reluInto(Matrix* m, Matrix* output);
