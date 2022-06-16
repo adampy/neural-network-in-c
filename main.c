@@ -7,11 +7,11 @@
 #include "imageInput.h"
 #include "err.h"
 
-#define LEARNING_RATE 3
-#define EPOCHS 50
-#define MINI_BATCH_SIZE 10 // 1 is SGD, anything else is mini-batch gradient descent
-#define HIDDEN_LAYERS 2
-unsigned int neurons[4] = {784, 30, 30, 10};
+//#define LEARNING_RATE 3
+//#define EPOCHS 50
+//#define MINI_BATCH_SIZE 10 // 1 is SGD, anything else is mini-batch gradient descent
+#define HIDDEN_LAYERS 1
+unsigned int neurons[3] = {784, 30, 10};
 
 /**
  * argv = {main, trainingDatasetFilename, trainingLabelsFilename,
@@ -20,11 +20,15 @@ unsigned int neurons[4] = {784, 30, 30, 10};
 int main(int argc, char** argv) {
     // Check all arguments given
     if (argc == 1) {
-        printf("Usage: ./main trainingDatasetFilename trainingLabelsFilename testDatasetFilename testLabelsFilename\n");
+        printf("Usage: ./main trainingDatasetFilename trainingLabelsFilename testDatasetFilename testLabelsFilename learningRate epochs miniBatchSize\n");
         return SUCCESS;
     }
-    if (argc != 5) {
+    if (argc != 8) {
         return reportError(BAD_ARGUMENT_COUNT, "");
+    }
+    double learningRate;
+    if (!sscanf(argv[5], "%lf", &learningRate)) {
+        return reportError(MISC, "Conversion of learning rate argument error");
     }
 
     // Initialise training dataset
@@ -44,7 +48,7 @@ int main(int argc, char** argv) {
 
     // Set up NN
     NeuralNetwork* network = NULL;
-    returnCode = makeNetwork(HIDDEN_LAYERS, neurons, LEARNING_RATE, &network);
+    returnCode = makeNetwork(HIDDEN_LAYERS, neurons, learningRate, &network);
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }
@@ -58,7 +62,7 @@ int main(int argc, char** argv) {
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }
-    returnCode = trainNetworkMiniBatches(network, EPOCHS, MINI_BATCH_SIZE);
+    returnCode = trainNetworkMiniBatches(network, atoi(argv[6]), atoi(argv[7]));
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }

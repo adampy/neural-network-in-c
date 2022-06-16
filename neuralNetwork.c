@@ -360,7 +360,7 @@ int trainNetworkSingleImage(NeuralNetwork* network, Image* img, Matrix** nablaW,
             return returnCode;
         }
 
-        Matrix* transposed = NULL; // TODO: Make these allocations consistent
+        Matrix* transposed = NULL;
         returnCode = transposeMatrix(network->a[l], &transposed);
         if (returnCode != SUCCESS) {
             return returnCode;
