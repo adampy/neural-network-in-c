@@ -41,9 +41,35 @@ int makeNetwork(unsigned int hiddenLayers, unsigned int* neurons,
 void freeNetwork(NeuralNetwork* network);
 
 /**
+ * Saves the header information of a network `network` in a file called
+ * `network` in the current directory.
+ */
+int saveNetworkHeaderFile(NeuralNetwork* network);
+
+/**
+ * Saves the layers of a network `network` in the current directory. Each
+ * layer is comprised of a bias file and a network file, and these are of
+ * the format `weightN` and `biasN` where `N` is the layer, starting at 0.
+ */
+int saveNetworkLayerFiles(NeuralNetwork* network);
+
+/**
  * Saves a network in the directory `dir`.
  */
 int saveNetwork(NeuralNetwork* network, char* dir);
+
+/**
+ * Loads a network from a header file in the current directory and allocates
+ * the netwrok in the output vector `network`. `learningRate` is given because
+ * it is needed for the `makeNetwork` function.
+ */
+int loadNetworkHeaderFile(NeuralNetwork** network, double learningRate);
+
+/**
+ * Loads a networks layer files from the current directory and places them
+ * into a network `network`.
+ */
+int loadNetworkLayerFiles(NeuralNetwork** network);
 
 /**
  * Loads a network from the directory `dir` into the output vector `network`.
