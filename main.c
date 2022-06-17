@@ -46,13 +46,12 @@ int main(int argc, char** argv) {
     }
 
     // --- MAKE NEURAL NETWORK ---
+    NeuralNetwork* network = NULL;
     /*unsigned int* neurons = calloc(sizeof(unsigned int), HIDDEN_LAYERS + 2);
     neurons[0] = 784;
     neurons[1] = 30;
-    neurons[2] = 10;*/
-    
-    NeuralNetwork* network = NULL;
-    /*returnCode = makeNetwork(HIDDEN_LAYERS, neurons, learningRate, &network);
+    neurons[2] = 10;
+    returnCode = makeNetwork(HIDDEN_LAYERS, neurons, learningRate, &network);
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }*/
