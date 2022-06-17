@@ -1,13 +1,16 @@
-#include <stdlib.h>
+#include <stdio.h> // For printing evaluations and loading/saving networks
+#include <stdlib.h> // For mallocs and frees
 #include <time.h> // For random number generation
+#include <unistd.h> // For change directory and getting current directory
+#include <sys/stat.h> // For mkdir
 #include "neuralNetwork.h" // TODO: Remove all includes and put them in headers
 #include "imageInput.h" // Used for implementation of evaluateNetwork
 #include "mathLib.h" // For zeroMatrix in gradient descent
 #include "utils.h" // For shuffle
 
-#include <stdio.h>
+#define PATH_MAX 128
 
-//Regular text
+// Coloured text
 #define BLK "\e[1;30m"
 #define RED "\e[1;31m"
 #define GRN "\e[1;32m"
@@ -57,7 +60,7 @@ int makeNetwork(unsigned int hiddenLayers, unsigned int* neurons,
             return returnCode;
         }
 
-        // Assign random values to matrices from -2 to 2
+        // Assign random values to matrices
         randomiseMatrix(weights);
         randomiseMatrix(biases);
 
@@ -101,8 +104,119 @@ void freeNetwork(NeuralNetwork* network) {
     free(network->biases);
     free(network->a);
     free(network->z);
+    free(network->neurons);
     // Free network itself
     free(network);
+}
+
+int saveNetwork(NeuralNetwork* network, char* dir) {
+    // Make new directory
+    if (chdir(dir) != SUCCESS) {
+        if (mkdir(dir, 0777) != SUCCESS) {
+            return reportError(MISC, "saveNetwork error: `dir` cannot be made");
+        }
+        if (chdir(dir) != SUCCESS) {
+            return reportError(MISC, "saveNetwork error: `dir` does not exist");
+        }
+    }
+
+    // Now in directory, save the network to a file
+    FILE* file = fopen("network", "wb");
+    if (file == NULL) {
+        return reportError(MISC, "saveNetwork error: network file could not be opened");
+    }
+
+    int written = fwrite(&network->hiddenLayers, sizeof(unsigned int), 1, file);
+    written += fwrite(network->neurons, sizeof(unsigned int), network->hiddenLayers + 2, file);
+    if (written != network->hiddenLayers + 3) {
+        return reportError(MISC, "saveNetwork error: fwrite header error");
+    }
+
+    // Write weight and bias for each layers
+    char buffer[128]; // Output buffer
+    for (int i = 0; i < network->hiddenLayers + 1; i++) {
+        // Write a weight file
+        sprintf(buffer, "weight%i", i);
+        int returnCode = saveMatrix(network->weights[i], buffer);
+        if (returnCode != SUCCESS) {
+            return reportError(MISC, "saveNetwork error: fwrite data error (weights)");
+        }
+        buffer[0] = '\0';
+
+        // Write a bias file
+        returnCode = saveMatrix(network->biases[i], buffer);
+        if (returnCode != SUCCESS) {
+            return reportError(MISC, "saveNetwork error: fwrite data error (biases)");
+        }
+        buffer[0] = '\0';
+    } // TODO: Add cleanup with fclose in it before return
+
+    if (!chdir("-")) { // Go back to root directory
+        return reportError(MISC, "saveNetwork error: directory could not be changed");
+    }
+    fclose(file);
+    return SUCCESS;
+}
+
+int loadNetwork(NeuralNetwork** network, char* dir, double learningRate) {
+    // Save current directory
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        return reportError(MISC, "loadNetwork error: current directory could not be saved");
+    }
+
+    if (chdir(dir) != SUCCESS) {
+        return reportError(MISC, "loadNetwork error: `dir` does not exist");
+    }
+
+    // Now in directory, save the network to a file
+    FILE* file = fopen("network", "rb");
+    if (file == NULL) {
+        return reportError(MISC, "loadNetwork error: network file could not be opened");
+    }
+
+    // Read header from network file
+    unsigned int hiddenLayers;
+    unsigned int* neurons = calloc(sizeof(unsigned int), hiddenLayers + 2);
+    if (fread(&hiddenLayers, sizeof(unsigned int), 1, file) != 1) {
+        return reportError(MISC, "loadNetwork error: fread header error (layers)");
+    }
+    int read = fread(neurons, sizeof(unsigned int), hiddenLayers + 2, file);
+    if (read != hiddenLayers + 2) {
+        return reportError(MISC, "loadNetwork error: fread header error (neurons)");
+    }
+
+    // Set up NN
+    int returnCode = makeNetwork(hiddenLayers, neurons, learningRate, network);
+    if (returnCode != SUCCESS) {
+        return returnCode;
+    }
+
+    // Read weight and bias for each layers
+    char buffer[128]; // Input buffer
+    for (int i = 0; i < hiddenLayers + 1; i++) {
+        // Read a weight filename
+        sprintf(buffer, "weight%i", i);
+        returnCode = loadMatrixInto((*network)->weights[i], buffer);
+        if (returnCode != SUCCESS) {
+            return returnCode;
+        }
+        buffer[0] = '\0';
+
+        // Read a bias filename
+        sprintf(buffer, "bias%i", i);
+        returnCode = loadMatrixInto((*network)->biases[i], buffer);
+        if (returnCode != SUCCESS) {
+            return returnCode;
+        }
+        buffer[0] = '\0';
+    } // TODO: Add cleanup with fclose in it before return
+
+    if (!chdir("-")) { // Go back to root directory
+        return reportError(MISC, "loadNetwork error: directory could not be changed");
+    }
+    fclose(file);
+    return SUCCESS;
 }
 
 int feedForwardNetwork(NeuralNetwork* network, Matrix* input) {

@@ -9,6 +9,7 @@
 typedef struct _NeuralNetwork {
     unsigned int hiddenLayers;
     unsigned int* neurons;
+
     double learningRate;
     Matrix** weights;
     Matrix** biases;
@@ -23,7 +24,8 @@ typedef struct _NeuralNetwork {
 
 /**
  * Creates a `NeuralNetwork` from the given parameters, and stores it in the
- * `network` output vector.
+ * `network` output vector. `neurons` is freed in `freeNetwork` so must be
+ * dynamically allocated before this function.
  * hiddenLayers = number of hidden layers
  * neurons[0] = number of neurons in the input layer
  * neurons[n] = number of neurons in the n-1th hidden layer
@@ -37,6 +39,17 @@ int makeNetwork(unsigned int hiddenLayers, unsigned int* neurons,
  * Frees all the memory relating to a given network `network`.
  */
 void freeNetwork(NeuralNetwork* network);
+
+/**
+ * Saves a network in the directory `dir`.
+ */
+int saveNetwork(NeuralNetwork* network, char* dir);
+
+/**
+ * Loads a network from the directory `dir` into the output vector `network`.
+ * `learningRate` is the inteded learning rate of the network.
+ */
+int loadNetwork(NeuralNetwork** network, char* dir, double learningRate);
 
 /**
  * Returns the output of the network when `input` is the input. Outputs
