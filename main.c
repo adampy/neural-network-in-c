@@ -11,7 +11,6 @@
 //#define EPOCHS 50
 //#define MINI_BATCH_SIZE 10 // 1 is SGD, anything else is mini-batch gradient descent
 #define HIDDEN_LAYERS 1
-unsigned int neurons[3] = {784, 30, 10};
 
 /**
  * argv = {main, trainingDatasetFilename, trainingLabelsFilename,
@@ -31,14 +30,14 @@ int main(int argc, char** argv) {
         return reportError(MISC, "Conversion of learning rate argument error");
     }
 
-    // Initialise training dataset
+    // --- TRAINING DATASET ---
     int numberOfTrainingImages = 0;
     Image** trainingImages = NULL;
     int returnCode = readMNIST(argv[1], argv[2], &trainingImages, &numberOfTrainingImages);
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }
-    // Initialise testing dataset
+    // --- TESTING DATASET ---
     int numberOfTestingImages = 0;
     Image** testingImages = NULL;
     returnCode = readMNIST(argv[3], argv[4], &testingImages, &numberOfTestingImages);
@@ -46,9 +45,19 @@ int main(int argc, char** argv) {
         goto cleanUp;
     }
 
-    // Set up NN
+    // --- MAKE NEURAL NETWORK ---
+    /*unsigned int* neurons = calloc(sizeof(unsigned int), HIDDEN_LAYERS + 2);
+    neurons[0] = 784;
+    neurons[1] = 30;
+    neurons[2] = 10;*/
+    
     NeuralNetwork* network = NULL;
-    returnCode = makeNetwork(HIDDEN_LAYERS, neurons, learningRate, &network);
+    /*returnCode = makeNetwork(HIDDEN_LAYERS, neurons, learningRate, &network);
+    if (returnCode != SUCCESS) {
+        goto cleanUp;
+    }*/
+    
+    returnCode = loadNetwork(&network, "network", learningRate);
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }
@@ -57,12 +66,20 @@ int main(int argc, char** argv) {
     network->testingImages = testingImages;
     network->numberOfTestingImages = numberOfTestingImages;
 
-    // --- Evaluate once ---
+    // --- EVALUATION ---
     returnCode = evaluateNetwork(network, "Initial");
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }
+
+    // --- TRAINING --- 
     returnCode = trainNetworkMiniBatches(network, atoi(argv[6]), atoi(argv[7]));
+    if (returnCode != SUCCESS) {
+        goto cleanUp;
+    }
+
+    // --- SAVING ---
+    returnCode = saveNetwork(network, "network");
     if (returnCode != SUCCESS) {
         goto cleanUp;
     }
