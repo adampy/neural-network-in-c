@@ -23,6 +23,54 @@ int freeMatrix(Matrix* m) {
     return SUCCESS;
 }
 
+int loadMatrixInto(Matrix* m, char* inputFilename) {
+    // Open input file
+    FILE* file = fopen(inputFilename, "rb");
+    if (file == NULL) {
+        return reportError(MISC, "loadMatrix error: matrix input file could not be opened");
+    }
+
+    // Read header (rows and columns)
+    int read = fread(&m->rows, sizeof(unsigned int), 1, file);
+    read += fread(&m->columns, sizeof(unsigned int), 1, file);
+    if (read != 2) {
+        return reportError(MISC, "loadMatrix error: fread header error");
+    }
+
+    // Read data
+    read = fread(m->values, sizeof(double), m->rows * m->columns, file);
+    if (read != m->rows * m->columns) {
+        return reportError(MISC, "loadMatrix error: fread data error");
+    }
+
+    fclose(file);
+    return SUCCESS;
+}
+
+int saveMatrix(Matrix* m, char* outputFilename) {
+    // Open output file
+    FILE* file = fopen(outputFilename, "wb");
+    if (file == NULL) {
+        return reportError(MISC, "saveMatrix error: matrix output file could not be opened");
+    }
+
+    // Write header (rows and columns)
+    int written = fwrite(&m->rows, sizeof(unsigned int), 1, file);
+    written += fwrite(&m->columns, sizeof(unsigned int), 1, file);
+    if (written != 2) {
+        return reportError(MISC, "saveMatrix error: fwrite header error");
+    }
+
+    // Write data
+    written = fwrite(m->values, sizeof(double), m->rows * m->columns, file);
+    if (written != m->rows * m->columns) {
+        return reportError(MISC, "saveMatrix error: fwrite data error");
+    }
+
+    fclose(file);
+    return SUCCESS;
+}
+
 int addMatricesInto(Matrix* m1, Matrix* m2, Matrix* result) {
     // Check dimensions
     if (m1->rows != m2->rows || m1->columns != m2->columns) {

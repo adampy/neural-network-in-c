@@ -1,6 +1,8 @@
 #ifndef MATH_LIB
 #define MATH_LIB
 
+#include <stdio.h>
+
 typedef struct _Matrix {
     double* values; // Stores all the values in a 1D matrix
     unsigned int rows;
@@ -11,6 +13,11 @@ typedef struct _Matrix {
 int makeMatrix(unsigned int rows, unsigned int columns, Matrix** m);
 int freeMatrix(Matrix* m);
 
+// --- IO Functions ---
+int loadMatrixInto(Matrix* m, char* inputFilename);
+int saveMatrix(Matrix* m, char* outputFilename);
+
+// --- Operations ---
 int addMatricesInto(Matrix* m1, Matrix* m2, Matrix* result);
 int multiplyScalarInto(Matrix* m1, double scalar, Matrix* result);
 int multiplyMatricesInto(Matrix* m1, Matrix* m2, Matrix* result);
